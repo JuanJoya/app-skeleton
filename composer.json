@@ -1,0 +1,23 @@
+{
+    "name": "juanjoya/custom-mvc",
+    "description": "based Bahit's mini framework mvc just for security testing.",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Juan David Joya",
+            "email": "ing.juanjoya@outlook.com"
+        }
+    ],
+    "require": {
+        "illuminate/support": "5.1.*"
+    },
+    "autoload": {
+    	"psr-4": {
+    		"CustomMVC\\": "app/" 
+    	}
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.2"
+    }
+}

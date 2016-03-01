@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Oswald:400,300' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="{css1}">
+	<link rel="stylesheet" type="text/css" href="{css2}">
+	<title>ABM de Usuarios: {subtitulo}</title>
+</head>
+<body>
+
+<header class="Header-main">
+    <h1>User CRUD</h1>
+    <h2>{subtitulo}</h2>    
+</header>
+
+<nav class="Nav-menu ">
+    <ul class="Nav-list">
+        <li>
+            <a href="{home}">Home</a>
+        </li>
+        <li>
+            <a href="{agregar}" title="Nuevo usuario">Agregar usuario</a>
+        </li>
+        <li>
+            <a href="{buscar}" title="Buscar usuario">Buscar/editar usuario</a>
+        </li>
+        <li>
+            <a href="{borrar}" title="Borrar usuario">Borrar usuario</a>
+        </li>
+        <li>
+            <a href="{listar}" title="Listar usuarios">Listar usuarios</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="Message">
+    Status: <span>{mensaje}</span>
+</div>
+
+<div class="Form">
+    {formulario}
+</div>
+</body>
+
+</html>
