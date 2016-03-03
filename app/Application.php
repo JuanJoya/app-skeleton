@@ -1,22 +1,37 @@
 <?php
 namespace CustomMVC;
-use CustomMVC\User\Controller;
 use CustomMVC\Core\Request;
 
 class Application {
-
+    /**
+     * @var string con la URL sanitizada
+     */
     private $url;
 
-    public function __construct($url){
-        $this->url = $this->clean_url($url);
+    /**
+     * @param string $url
+     */
+    public function __construct($url)
+    {
+        $this->url = $this->cleanUrl($url);
     }
 
-    public function run(){
+    /**
+     * Crea una instancia de Request para analizar la URL y ejecutar la petición
+     */
+    public function run()
+    {
         $Request = new Request($this->url);
         $Request->execute();
     }
 
-    public function clean_url($url){
+    /**
+     * @param string $url
+     * @return string
+     * limpia la URL de caracteres extraños
+     */
+    public function cleanUrl($url)
+    {
         $url = filter_var($url, FILTER_SANITIZE_URL);
         return $url;
     }

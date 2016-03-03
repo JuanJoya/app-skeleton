@@ -2,9 +2,14 @@
 namespace CustomMVC\Home;
 use CustomMVC\Core\BaseView;
 
-class View extends BaseView {
-
-    public function set_context(){
+class View extends BaseView
+{
+    /**
+     * genera el contenido de la variable $this->context
+     * es parte de la data que se renderiza en el template
+     */
+    public function setContext()
+    {
         $data = array(
             'assets_links'=>array(
                     'css1'=>URL.'css/normalize.css',
@@ -17,11 +22,17 @@ class View extends BaseView {
         $this->context = $data;
     }
 
-    public function render($resource) {
-        $html = $this->get_template($resource);
-        $html = str_replace('{formulario}', $this->get_template($resource, $this->template), $html);
-        $html = $this->render_dinamic_data($html, $this->context['assets_links']);
-        $html = $this->render_dinamic_data($html, $this->context['routes']);       
+    /**
+     * @param string $resource nombre de la carpeta que contiene las vistas html
+     * implementación del método abstracto de BaseView, construye e imprime el
+     * contenido html de la vista
+     */
+    public function render($resource)
+    {
+        $html = $this->getTemplate($resource);
+        $html = str_replace('{formulario}', $this->getTemplate($resource, $this->template), $html);
+        $html = $this->renderDynamicData($html, $this->context['assets_links']);
+        $html = $this->renderDynamicData($html, $this->context['routes']);
         print $html;
     }
 

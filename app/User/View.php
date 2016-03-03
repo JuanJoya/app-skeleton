@@ -1,10 +1,16 @@
 <?php
 namespace CustomMVC\User;
 use CustomMVC\Core\BaseView;
+use Illuminate\Support\Collection;
 
-class View extends BaseView {
-
-    public function set_context(){
+class View extends BaseView
+{
+    /**
+     * genera el contenido de la variable $this->context
+     * es parte de la data que se renderiza en el template
+     */
+    public function setContext()
+    {
         $data = array(
             'subtitle'=>array(
                             'agregar'=>'Crear un nuevo usuario',
@@ -36,47 +42,52 @@ class View extends BaseView {
         $this->context = $data;
     }
 
-    public function render_data_grid($html, $data=array()){
-        $aux='';
-        foreach ($data as $value) {
-            $aux.="
-                <tr>
-                    <td>".$value['nombre']."</td>
-                    <td>".$value['apellido']."</td>
-                    <td>".$value['email']."</td>
-                </tr>"; 
+    /**
+     * @param string $html contenido literal del content
+     * @param Collection|null $data instancias de User para generar la grilla
+     * @return string
+     */
+    public function renderDataGrid($html, Collection $data = null)
+    {
+        $grid='';
+        if($data)
+        {
+            foreach ($data as $user) {
+                $grid.="
+                    <tr>
+                        <td>".$user->getFirstName()."</td>
+                        <td>".$user->getLastName()."</td>
+                        <td>".$user->getEmail()."</td>
+                    </tr>"; 
+            }            
         }
-        $html = str_replace('{data_grid}', $aux, $html);
+        $html = str_replace('{data_grid}', $grid, $html);
         return $html;
     }
 
-    public function render($resource) {
-
-        $html = $this->get_template($resource);
+    /**
+     * @param string $resource nombre de la carpeta que contiene las vistas html
+     * implementación del método abstracto de BaseView, construye e imprime el
+     * contenido html de la vista
+     */
+    public function render($resource)
+    {
+        $html = $this->getTemplate($resource);
         $html = str_replace('{subtitulo}', $this->context['subtitle'][$this->template], $html);
-        $html = str_replace('{formulario}', $this->get_template($resource, $this->template), $html);
-        $html = $this->render_dinamic_data($html, $this->context['form_actions']);
-        $html = $this->render_dinamic_data($html, $this->context['assets_links']);
-        $html = $this->render_dinamic_data($html, $this->context['routes']); 
-
-        
-        if($this->template == 'listar'){
-            $mensaje = array_pop($this->data);
-            $html = $this->render_data_grid($html, $this->data);
-            $this->data = ['mensaje' => $mensaje];
+        $html = str_replace('{formulario}', $this->getTemplate($resource, $this->template), $html);
+        $html = $this->renderDynamicData($html, $this->context['form_actions']);
+        $html = $this->renderDynamicData($html, $this->context['assets_links']);
+        $html = $this->renderDynamicData($html, $this->context['routes']);
+        $html = str_replace('{mensaje}', $this->message, $html);
+  
+        if($this->template == 'listar')
+        {
+            $html = $this->renderDataGrid($html, $this->params);
         }
-        else{ 
-            $html = $this->render_dinamic_data($html, $this->data);
+        elseif($this->params)
+        { 
+            $html = $this->renderDynamicData($html, $this->params);
         }
-
-        // render {mensaje}
-        if(array_key_exists('mensaje', $this->data)) {
-            $mensaje = $this->data['mensaje'];
-        } else {
-            $mensaje = 'Datos del usuario';
-        }
-
-        $html = str_replace('{mensaje}', $mensaje, $html);
 
         print $html;
     }

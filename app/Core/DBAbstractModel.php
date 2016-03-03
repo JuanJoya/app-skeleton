@@ -1,79 +1,151 @@
 <?php
 namespace CustomMVC\Core;
 
-abstract class DBAbstractModel {
-
-    private static $db_host = 'localhost';
-    private static $db_user = 'root';
-    private static $db_pass = 'root';
+abstract class DBAbstractModel
+{
+	/**
+	 * @var string
+	 */
+    private static $dbHost = 'localhost';
+	/**
+	 * @var string
+	 */
+    private static $dbUser = 'root';
+	/**
+	 * @var string
+	 */
+    private static $dbPass = 'root';
+	/**
+	 * @var \PDO objeto que permite trabajar con la DB
+	 */
     private static $conn;
-    protected $db_name = 'mydb';
+	/**
+	 * @var string
+	 */
+    protected $dbName = 'DataBase';
+	/**
+	 * @var string con sentencia SQL
+	 */
     protected $query;
+	/**
+	 * @var array resultado al traer datos de la DB
+	 */
     protected $rows = array();
-    protected $affected_rows;
-    protected $bind_params = array();
-    public $status;
+	/**
+	 * @var int registros afectados por un query
+	 */
+    protected $affectedRows;
+	/**
+	 * @var array con los parámetros para el binding del query
+	 */
+    protected $bindParams = array();
 
+	/**
+	 * @return object|null permite realizar consultas SELECT
+	 */
     abstract protected function get();
+
+	/**
+	 * permite realizar INSERT
+	 */
     abstract protected function set();
+
+	/**
+	 * permite realizar UPDATE
+	 */
     abstract protected function edit();
+
+	/**
+	 * permite realizar DELETE
+	 */
     abstract protected function delete();
 
-	private function open_connection() {
-		try {
-			if(!self::$conn) {
+	/**
+	 * @throws \Exception si falla al crear PDO
+	 * Crea el objeto PDO, si este existe, utiliza la misma instancia
+	 * para no crear multiples conexiones a la DB
+	 */
+	private function openConnection()
+	{
+		try
+		{
+			if(!self::$conn)
+			{
 				self::$conn = new \PDO(
-					'mysql:host=' . self::$db_host . ';dbname=' . $this->db_name . ';charset=utf8;',
-					self::$db_user,
-					self::$db_pass,
+					'mysql:host=' . self::$dbHost . ';dbname=' . $this->dbName . ';charset=utf8;',
+					self::$dbUser,
+					self::$dbPass,
 					array(\PDO::MYSQL_ATTR_FOUND_ROWS => true)
 				);
 			}
 		}
-		catch (\PDOException $e){
+		catch (\PDOException $e)
+		{
     		throw new \Exception('Error al establecer conexión con la DB');
 		}
 	}
 
-	private function db_query(){
-		try{
+	/**
+	 * @return \PDOStatement $result objeto con los resultados asociados al execute del query
+	 * @throws \Exception
+	 * realiza el binding del query (sentencia preparada), ejecuta el query y retorna el Statement
+	 */
+	private function dbQuery()
+	{
+		try
+		{
 			$result = self::$conn->prepare($this->query);
-			foreach ($this->bind_params as $key => &$param) {
+			foreach ($this->bindParams as $key => &$param)
+			{
 				$result->bindParam($key, $param);
 			}
 			$result->execute();
 			return $result;
 		}
-		catch (\PDOException $e){
+		catch (\PDOException $e)
+		{
     		throw new \Exception('Error al ejecutar query en la DB');
 		}		
 	}
 
-	protected function execute_single_query() {
-		try{
-		    if($_POST) {
-		        $this->open_connection();
-		        $result = $this->db_query();
-		        $this->affected_rows = $result->rowCount();
+	/**
+	 * permite ejecutar las sentencias UPDATE, INSERT, DELETE
+	 * @throws \Exception
+	 */
+	protected function executeSingleQuery()
+	{
+		try
+		{
+		    if($_POST)
+			{
+		        $this->openConnection();
+		        $result = $this->dbQuery();
+		        $this->affectedRows = $result->rowCount();
 		        $result = null;
-		    } else {
-		        $this->status = 'método no permitido';
 		    }
 		}
-		catch(\Exception $e){
-			throw new \Exception('No es posible ejecutar el query, '.$e->getMessage());
+		catch(\Exception $e)
+		{
+			throw new \Exception('No es posible ejecutar query, '.$e->getMessage());
 		}
 	}
 
-	protected function get_results_from_query() {
-		try{
-	        $this->open_connection();
-	        $result = $this->db_query();
+	/**
+	 * permite ejecutar SELECT, modela el resultado (PDOStatement) en un array $rows
+	 * @throws \Exception
+	 */
+	protected function getResultsFromQuery()
+	{
+		try
+		{
+	        $this->openConnection();
+	        $result = $this->dbQuery();
 	        while ($this->rows[] = $result->fetch(\PDO::FETCH_ASSOC));
 	        $result= null;
 	        array_pop($this->rows);			
 		}
-		catch(\Exception $e){
+		catch(\Exception $e)
+		{
 			throw new \Exception('No es posible traer resultados, '.$e->getMessage());
 		}
 	}

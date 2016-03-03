@@ -1,15 +1,30 @@
 <?php
 namespace CustomMVC\Home;
 
-class Controller {
+class Controller
+{
+	/**
+	 * @var array parámetros opcionales de la URL
+	 */
+    private $urlParams;
 
-    private $params;
-
-    public function index($params=[]){
+	/**
+	 * @param array $urlParams
+	 * @return View instancia de la vista, al constructor se le
+	 * envia el nombre del template
+	 */
+    public function index(array $urlParams=[])
+	{
+		$this->urlParams = $urlParams;
     	return new View('home');
     }
- 	
- 	public function error(){
+
+	/**
+	 * evento en caso de error en la URL
+	 * @return View
+	 */
+ 	public function error()
+	{
  		return new View('404');
  	}
 }

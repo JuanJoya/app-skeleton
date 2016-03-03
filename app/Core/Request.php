@@ -1,65 +1,128 @@
 <?php
 namespace CustomMVC\Core;
 
-class Request{
-
+class Request
+{
+    /**
+     * @var string con la URL del Request
+     */
     private $url;
+    /**
+     * @var string primer parámetro de la URL con el nombre del recurso
+     */
     private $resource;
-    private $default_resource = 'Home';
+    /**
+     * @var string nombre por defecto del recurso
+     */
+    private $defaultResource = 'Home';
+    /**
+     * @var string segundo parámetro de la URL con el nombre del evento
+     * (function) a ejecutar en el controller
+     */
     private $event;
-    private $default_event = 'index';
+    /**
+     * @var string nombre por defecto del evento
+     */
+    private $defaultEvent = 'index';
+    /**
+     * @var array parámetros adicionales de la URL
+     */
     private $params = array();
 
-    public function __construct($url){
+    /**
+     * @param string $url string con la URL del Request
+     * se divide la URL en un array para analizar cada segmento
+     */
+    public function __construct($url)
+    {
         $this->url = $url;
-        $segments = explode('/', $this->get_url());
-        $this->resolve_resource($segments);
-        $this->resolve_event($segments);
-        $this->resolve_params($segments);
+        $segments = explode('/', $this->getUrl());
+        $this->resolveResource($segments);
+        $this->resolveEvent($segments);
+        $this->resolveParams($segments);
     }
 
-    public function resolve_resource(&$segments){
+    /**
+     * @param array $segments
+     * resuelve el primer segmento de la URL para identificar el recurso
+     */
+    public function resolveResource(&$segments)
+    {
         $this->resource = ucfirst(array_shift($segments));
         if (empty($this->resource)){
-            $this->resource = $this->default_resource;
+            $this->resource = $this->defaultResource;
         }
     }
 
-    public function resolve_event(&$segments)
+    /**
+     * @param array $segments
+     * resuelve el segundo segmento de la URL para identificar el evento
+     */
+    public function resolveEvent(&$segments)
     {
         $this->event = array_shift($segments);
-        if (empty($this->event)){
-            $this->event = $this->default_event;
+        if (empty($this->event))
+        {
+            $this->event = $this->defaultEvent;
         }
     }
 
-    public function resolve_params(&$segments){
+    /**
+     * @param array $segments
+     * resuelve el segmento final de la URL para identificar los parámetros
+     * opcionales de la URL
+     */
+    public function resolveParams(&$segments)
+    {
         $this->params = $segments;
     }
 
-    public function get_resource_path(){
+    /**
+     * @return string $path ruta del directorio del recurso en el servidor
+     */
+    public function getResourcePath()
+    {
     	$path = dirname(__DIR__).'\\'.$this->resource;
     	return $path;
     }
 
-    public function get_resource_name_space(){
+    /**
+     * @return string $name_space construye el namespace para poder instanciar
+     * el controller del recurso
+     */
+    public function getResourceNameSpace()
+    {
         $name_space = "CustomMVC\\$this->resource\\Controller";
         return $name_space;
     }
 
-    public function get_url(){
+    /**
+     * @return string devuelve la URL del request
+     */
+    public function getUrl()
+    {
         return $this->url;
     }
 
-    public function execute(){
+    /**
+     * Identifica si el recurso existe en el servidor, luego si el evento del
+     * recurso existe, si no existe se genera un error 404
+     * se instancia el controller adecuado, se llama al evento con los parámetros
+     * adicionales
+     * el evento del controller retorna una instancia de View
+     * Se renderiza la vista
+     */
+    public function execute()
+    {
         $event = $this->event;
-        $path = $this->get_resource_path();
-        $controller = $this->get_resource_name_space();
+        $path = $this->getResourcePath();
+        $controller = $this->getResourceNameSpace();
 
-        if (!file_exists($path) || !method_exists($controller, $event)){
+        if (!file_exists($path) || !method_exists($controller, $event))
+        {
             $event = 'error';
-            $this->resource = $this->default_resource;
-            $controller = $this->get_resource_name_space();
+            $this->resource = $this->defaultResource;
+            $controller = $this->getResourceNameSpace();
         }
         
         $response = new $controller;
