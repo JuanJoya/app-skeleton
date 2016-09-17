@@ -1,4 +1,5 @@
 <?php
+
 namespace CustomMVC\Core;
 
 abstract class DBAbstractModel
@@ -69,8 +70,7 @@ abstract class DBAbstractModel
 	{
 		try
 		{
-			if(!self::$conn)
-			{
+			if(!self::$conn) {
 				self::$conn = new \PDO(
 					'mysql:host=' . self::$dbHost . ';dbname=' . $this->dbName . ';charset=utf8;',
 					self::$dbUser,
@@ -81,7 +81,7 @@ abstract class DBAbstractModel
 		}
 		catch (\PDOException $e)
 		{
-    		throw new \Exception('Error al establecer conexión con la DB');
+    		throw new \Exception('Failed to connect to the DB');
 		}
 	}
 
@@ -95,8 +95,7 @@ abstract class DBAbstractModel
 		try
 		{
 			$result = self::$conn->prepare($this->query);
-			foreach ($this->bindParams as $key => &$param)
-			{
+			foreach ($this->bindParams as $key => &$param) {
 				$result->bindParam($key, $param);
 			}
 			$result->execute();
@@ -104,7 +103,7 @@ abstract class DBAbstractModel
 		}
 		catch (\PDOException $e)
 		{
-    		throw new \Exception('Error al ejecutar query en la DB');
+    		throw new \Exception('Error running query on the DB');
 		}		
 	}
 
@@ -116,8 +115,7 @@ abstract class DBAbstractModel
 	{
 		try
 		{
-		    if($_POST)
-			{
+		    if($_POST) {
 		        $this->openConnection();
 		        $result = $this->dbQuery();
 		        $this->affectedRows = $result->rowCount();
@@ -126,7 +124,7 @@ abstract class DBAbstractModel
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception('No es posible ejecutar query, '.$e->getMessage());
+			throw new \Exception('Error running query, '.$e->getMessage());
 		}
 	}
 
@@ -146,7 +144,7 @@ abstract class DBAbstractModel
 		}
 		catch(\Exception $e)
 		{
-			throw new \Exception('No es posible traer resultados, '.$e->getMessage());
+			throw new \Exception('Failed to bring results, '.$e->getMessage());
 		}
 	}
 }

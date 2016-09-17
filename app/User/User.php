@@ -1,4 +1,5 @@
 <?php
+
 namespace CustomMVC\User;
 
 class User
@@ -31,16 +32,14 @@ class User
      */
     public function __construct($email, $password, $id = null)
     {
-        if(!is_string($email) || !is_string($password))
-        {
+        if(!is_string($email) || !is_string($password)) {
             throw new \InvalidArgumentException();
         }
 
         $this->email = $email;
         $this->password = $password;
         
-        if(is_int($id))
-        {
+        if(is_int($id)) {
             $this->id = $id;
         }   
     }

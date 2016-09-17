@@ -2,17 +2,16 @@
 <html lang="es">
 <head>
 	<meta charset="UTF-8">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Oswald:400,300' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,300|Oswald:400,300' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="{css1}">
 	<link rel="stylesheet" type="text/css" href="{css2}">
-	<title>ABM de Usuarios: {subtitulo}</title>
+	<title>ABM de Usuarios</title>
 </head>
 <body>
 
 <header class="Header-main">
     <h1>User CRUD</h1>
-    <h2>{subtitulo}</h2>    
+    <h2>{subtitle}</h2>    
 </header>
 
 <nav class="Nav-menu ">
@@ -32,15 +31,18 @@
         <li>
             <a href="{listar}" title="Listar usuarios">Listar usuarios</a>
         </li>
+        <li>
+            <a href="{api}" title="api">Api</a>
+        </li>
     </ul>
 </nav>
 
 <div class="Message">
-    Status: <span>{mensaje}</span>
+    Status: <span>{message}</span>
 </div>
 
 <div class="Form">
-    {formulario}
+    {content}
 </div>
 </body>
 

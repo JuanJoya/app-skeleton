@@ -2,9 +2,14 @@
 
 Para generar el proyecto:
 ````
-Composer install
+composer install
 ````
-Para correr los tests
+Para correr los tests:
 ````
 phpunit --bootstrap vendor/autoload.php tests
+````
+Parámetros de configuración:
+````
+URL - constante en public/index.php
+variables de conexión con la DB en app/Core/DBAbstractModel
 ````

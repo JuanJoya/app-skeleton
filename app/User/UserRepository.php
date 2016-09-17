@@ -1,4 +1,5 @@
 <?php
+
 namespace CustomMVC\User;
 use CustomMVC\Core\DBAbstractModel;
 use Illuminate\Support\Collection;
@@ -18,7 +19,7 @@ class UserRepository extends DBAbstractModel
     {
         try
         {
-            $this->query = "SELECT * FROM usuarios";
+            $this->query = "SELECT * FROM users";
             $this->getResultsFromQuery();
             $this->status = 'Usuarios Registrados';
             $data = $this->mapToUsers($this->rows);
@@ -42,30 +43,26 @@ class UserRepository extends DBAbstractModel
     {
         try
         {
-            if(!empty($userEmail))
-            {
+            if(!empty($userEmail)) {
                 $this->query = "
-                    SELECT      id, nombre, apellido, email, clave
-                    FROM        usuarios
+                    SELECT      id, first_name, last_name, email, password
+                    FROM        users
                     WHERE       email = :email
                 ";
                 $this->bindParams = [':email' => $userEmail];
                 $this->getResultsFromQuery();
 
-                if(count($this->rows) == 1) 
-                {
+                if(count($this->rows) == 1) {
                     $this->status = 'Usuario encontrado';
                     $data = $this->mapEntity(array_shift($this->rows));     
                     return $data;
                 }
-                else
-                {
+                else {
                     $this->status = 'Usuario no encontrado';
                     return null;
                 }               
             } 
-            else
-            {
+            else {
                 $this->status = 'No sé ha introducido un email valido.';
                 return null;
             }
@@ -84,34 +81,31 @@ class UserRepository extends DBAbstractModel
     {
         try
         {
-            if(!empty($userData['email']))
-            {
+            if(!empty($userData['email'])) {
                 $anUser = $this->get($userData['email']);
                 $anUser ? $userEmail = $anUser->getEmail() : $userEmail = '';
-                if($userData['email'] != $userEmail)
-                {
+
+                if($userData['email'] != $userEmail) {
                     $this->query = "
-                            INSERT INTO     usuarios
-                            (nombre, apellido, email, clave)
+                            INSERT INTO     users
+                            (first_name, last_name, email, password)
                             VALUES
-                            (:name, :lastname, :email, :pass)
+                            (:first_name, :last_name, :email, :password)
                     ";
                     $this->bindParams = [
-                        ':name' => $userData['nombre'],
-                        ':lastname' => $userData['apellido'],
+                        ':first_name' => $userData['nombre'],
+                        ':last_name' => $userData['apellido'],
                         ':email' => $userData['email'],
-                        ':pass' => password_hash($userData['clave'], PASSWORD_DEFAULT),
+                        ':password' => password_hash($userData['clave'], PASSWORD_DEFAULT),
                     ];
                     $this->executeSingleQuery();
                     $this->status = 'Usuario agregado exitosamente';
                 } 
-                else 
-                {
+                else {
                     $this->status = 'El usuario ya existe';
                 }
             } 
-            else 
-            {
+            else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
         }
@@ -128,35 +122,31 @@ class UserRepository extends DBAbstractModel
     {
         try
         {
-            if(!empty($userData['email']))
-            {
-                foreach ($userData as $campo=>$valor)
-                {
+            if(!empty($userData['email'])) {
+                foreach ($userData as $campo=>$valor) {
                     ${$campo} = $valor;
                 }
                 $this->query = "
-                        UPDATE      usuarios
-                        SET         nombre = :name,
-                                    apellido = :lastname
+                        UPDATE      users
+                        SET         first_name = :first_name,
+                                    last_name = :last_name
                         WHERE       email = :email
                 ";
                 $this->bindParams = [
-                    ':name' => $userData['nombre'],
-                    ':lastname' => $userData['apellido'],
+                    ':first_name' => $userData['nombre'],
+                    ':last_name' => $userData['apellido'],
                     ':email' => $userData['email'],
                 ];        
                 $this->executeSingleQuery();
-                if($this->affectedRows)
-                {
+
+                if($this->affectedRows) {
                     $this->status = 'Usuario modificado';
                 }
-                else
-                {
+                else {
                     $this->status = 'Usuario no encontrado';
                 }  
             }
-            else
-            {
+            else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
         }
@@ -173,25 +163,22 @@ class UserRepository extends DBAbstractModel
     {
         try
         {
-            if(!empty($userEmail['email']))
-            {
+            if(!empty($userEmail['email'])) {
                 $this->query = "
-                        DELETE FROM     usuarios
+                        DELETE FROM     users
                         WHERE           email = :email
                 ";
                 $this->bindParams = [':email' => $userEmail['email']];
                 $this->executeSingleQuery();
-                if($this->affectedRows)
-                {
+
+                if($this->affectedRows) {
                     $this->status = 'Usuario eliminado';
                 }
-                else
-                {
+                else {
                     $this->status = 'Usuario no encontrado';
                 }
             }
-            else
-            {
+            else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
         }
@@ -209,8 +196,7 @@ class UserRepository extends DBAbstractModel
     private function mapToUsers(array $results)
     {
         $users = new Collection();
-        foreach ($results as $result) 
-        {
+        foreach ($results as $result) {
             $user = $this->mapEntity($result);
             $users->push($user);
         }
@@ -225,12 +211,12 @@ class UserRepository extends DBAbstractModel
     {
         $user = new User(
             $result['email'],
-            $result['clave'],
+            $result['password'],
             (int)$result['id']
         );
         $user->setName(
-            $result['nombre'],
-            $result['apellido']
+            $result['first_name'],
+            $result['last_name']
         );
         return $user;
     }

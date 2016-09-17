@@ -1,6 +1,8 @@
 <?php
+
 namespace CustomMVC;
 use CustomMVC\Core\Request;
+use CustomMVC\Core\Helper;
 
 class Application {
     /**
@@ -13,7 +15,7 @@ class Application {
      */
     public function __construct($url)
     {
-        $this->url = $this->cleanUrl($url);
+        $this->url = Helper::cleanUrl($url);
     }
 
     /**
@@ -23,16 +25,5 @@ class Application {
     {
         $Request = new Request($this->url);
         $Request->execute();
-    }
-
-    /**
-     * @param string $url
-     * @return string
-     * limpia la URL de caracteres extraños
-     */
-    public function cleanUrl($url)
-    {
-        $url = filter_var($url, FILTER_SANITIZE_URL);
-        return $url;
     }
 }

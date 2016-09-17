@@ -1,12 +1,9 @@
 <?php
+
 namespace CustomMVC\Home;
 
 class Controller
 {
-	/**
-	 * @var array parámetros opcionales de la URL
-	 */
-    private $urlParams;
 
 	/**
 	 * @param array $urlParams
@@ -15,7 +12,6 @@ class Controller
 	 */
     public function index(array $urlParams=[])
 	{
-		$this->urlParams = $urlParams;
     	return new View('home');
     }
 
@@ -25,7 +21,7 @@ class Controller
 	 */
  	public function error()
 	{
+		header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found"); 
  		return new View('404');
  	}
 }
-

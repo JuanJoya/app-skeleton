@@ -16,8 +16,5 @@
     	"psr-4": {
     		"CustomMVC\\": "app/" 
     	}
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^5.2"
     }
 }

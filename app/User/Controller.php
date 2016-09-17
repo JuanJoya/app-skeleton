@@ -1,12 +1,11 @@
 <?php
+
 namespace CustomMVC\User;
+use CustomMVC\Core\JsonResponse;
 
 class Controller 
 {
-    /**
-     * @var array parámetros opcionales de la URL
-     */
-    private $urlParams;
+
     /**
      * @var UserRepository instancia del modelo del usuario
      */
@@ -28,7 +27,6 @@ class Controller
      */
     public function index(array $urlParams=[])
     {
-        $this->urlParams = $urlParams;
         return new View('buscar');
     }
 
@@ -47,9 +45,8 @@ class Controller
     public function get()
     {
         $user = $this->userModel->get($this->userData);
-        if(empty($user))
-        {
-            return new View('buscar', [$user, $this->userModel->status]);
+        if(empty($user)) {
+            return new View('buscar', [null, $this->userModel->status]);
         }
         else
         {
@@ -89,6 +86,23 @@ class Controller
     }
 
     /**
+     * @param  array parametros desde la url
+     * @return JsonResponse 
+     */
+    public function api(array $urlParams=[])
+    {
+        $users = $this->userModel->all()->toArray();
+        foreach ($users as $user) {
+            $list[$user->getId()] = [
+                'first_name' => $user->getFirstName(),
+                'last_name'  => $user->getLastName(),
+                'email'      => $user->getEmail()
+            ];
+        }
+        return new JsonResponse($list);
+    }  
+
+    /**
      * @return View url = user/borrar
      */
     public function borrar()
@@ -120,24 +134,21 @@ class Controller
      */
     public function helperUserData() 
     {
-        $this->userData = array();
-        if($_POST) 
-        {
+        $this->userData = [];
+        if($_POST) {
             $this->userData = array_map('trim',$_POST);
-            $args = array(
-                'nombre'   => FILTER_SANITIZE_STRING,
-                'apellido'     => FILTER_SANITIZE_STRING,
-                'email'   => FILTER_VALIDATE_EMAIL,
+            $args = [
+                'nombre'    => FILTER_SANITIZE_STRING,
+                'apellido'  => FILTER_SANITIZE_STRING,
+                'email'     => FILTER_VALIDATE_EMAIL,
                 'clave'     => FILTER_UNSAFE_RAW,
-            );  
+            ];  
             $this->userData = filter_var_array($this->userData, $args, false);
         } 
-        else if(isset($_GET['email'])) 
-        {
+        elseif(isset($_GET['email'])) {
             $this->userData = array_map('trim',$_GET);
             $this->userData = filter_var($this->userData['email'], FILTER_VALIDATE_EMAIL);
         }
         return $this->userData;
     }
 }
-
