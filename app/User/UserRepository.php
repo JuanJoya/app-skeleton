@@ -56,13 +56,11 @@ class UserRepository extends DBAbstractModel
                     $this->status = 'Usuario encontrado';
                     $data = $this->mapEntity(array_shift($this->rows));     
                     return $data;
-                }
-                else {
+                } else {
                     $this->status = 'Usuario no encontrado';
                     return null;
                 }               
-            } 
-            else {
+            } else {
                 $this->status = 'No sé ha introducido un email valido.';
                 return null;
             }
@@ -100,12 +98,10 @@ class UserRepository extends DBAbstractModel
                     ];
                     $this->executeSingleQuery();
                     $this->status = 'Usuario agregado exitosamente';
-                } 
-                else {
+                } else {
                     $this->status = 'El usuario ya existe';
                 }
-            } 
-            else {
+            } else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
         }
@@ -123,9 +119,6 @@ class UserRepository extends DBAbstractModel
         try
         {
             if(!empty($userData['email'])) {
-                foreach ($userData as $campo=>$valor) {
-                    ${$campo} = $valor;
-                }
                 $this->query = "
                         UPDATE      users
                         SET         first_name = :first_name,
@@ -141,12 +134,10 @@ class UserRepository extends DBAbstractModel
 
                 if($this->affectedRows) {
                     $this->status = 'Usuario modificado';
-                }
-                else {
+                } else {
                     $this->status = 'Usuario no encontrado';
                 }  
-            }
-            else {
+            } else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
         }
@@ -173,12 +164,10 @@ class UserRepository extends DBAbstractModel
 
                 if($this->affectedRows) {
                     $this->status = 'Usuario eliminado';
-                }
-                else {
+                } else {
                     $this->status = 'Usuario no encontrado';
                 }
-            }
-            else {
+            } else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
         }
@@ -219,18 +208,5 @@ class UserRepository extends DBAbstractModel
             $result['last_name']
         );
         return $user;
-    }
-
-    /**
-     * $this->dbName permite setear el nombre de la DB que utiliza este modelo
-     */
-    function __construct() 
-    {
-        $this->dbName = 'test';
-    }
-
-    function __destruct() 
-    {
-        unset($this);
     }
 }

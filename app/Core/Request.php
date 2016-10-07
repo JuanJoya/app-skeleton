@@ -9,7 +9,7 @@ class Request
      */
     private $url;
     /**
-     * @var string primer parámetro de la URL con el nombre del recurso
+     * @var string primer parÃ¡metro de la URL con el nombre del recurso
      */
     private $resource;
     /**
@@ -17,7 +17,7 @@ class Request
      */
     private $defaultResource = 'Home';
     /**
-     * @var string segundo parámetro de la URL con el nombre del evento
+     * @var string segundo parÃ¡metro de la URL con el nombre del evento
      * (function) a ejecutar en el controller
      */
     private $event;
@@ -26,7 +26,7 @@ class Request
      */
     private $defaultEvent = 'index';
     /**
-     * @var array parámetros adicionales de la URL
+     * @var array parÃ¡metros adicionales de la URL
      */
     private $params = array();
 
@@ -47,9 +47,9 @@ class Request
         return $this->url;
     }
 
-    /*
-    * se divide la URL en un array para analizar cada segmento
-    */
+    /**
+     * se divide la URL en un array para analizar cada segmento
+     */
     protected function resolveUrl()
     {
         $segments = explode('/', $this->getUrl());
@@ -84,7 +84,7 @@ class Request
 
     /**
      * @param array $segments
-     * resuelve el segmento final de la URL para identificar los parámetros
+     * resuelve el segmento final de la URL para identificar los parÃ¡metros
      * opcionales de la URL
      */
     protected function resolveParams(&$segments)
@@ -114,7 +114,7 @@ class Request
     /**
      * Identifica si el recurso existe en el servidor, luego si el evento del
      * recurso existe, si no existe se genera un error 404
-     * se instancia el controller adecuado, se llama al evento con los parámetros
+     * se instancia el controller adecuado, se llama al evento con los parÃ¡metros
      * adicionales
      * el evento del controller retorna una instancia de View o cualquier clase que 
      * implemente Response, Se renderiza la vista

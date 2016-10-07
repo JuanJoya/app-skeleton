@@ -19,7 +19,7 @@ class Application {
     }
 
     /**
-     * Crea una instancia de Request para analizar la URL y ejecutar la petición
+     * Crea una instancia de Request para analizar la URL y ejecutar la peticiÃ³n
      */
     public function run()
     {

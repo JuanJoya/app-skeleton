@@ -43,10 +43,10 @@ class View extends BaseView
 
     /**
      * @param string $html contenido literal del content
-     * @param Collection|null $data instancias de User para generar la grilla
+     * @param array $data instancias de User para generar la grilla
      * @return string
      */
-    protected function renderDataGrid($html, Collection $data = null)
+    protected function renderDataGrid($html, array $data = null)
     {
         $grid='';
         if($data)
@@ -66,25 +66,22 @@ class View extends BaseView
 
     /**
      * @param string $resource nombre de la carpeta que contiene las vistas html
-     * implementación del método abstracto de BaseView, construye e imprime el
+     * implementaciÃ³n del mÃ©todo abstracto de BaseView, construye e imprime el
      * contenido html de la vista
+     * @param bool $print
+     * @return string
      */
     public function render($resource, $print = true)
     {
         $subtitle = array_shift($this->context);
         $html = parent::render($resource, false);
-
         $html = str_replace('{subtitle}', $subtitle[$this->template], $html);
-        $html = str_replace('{message}', $this->message, $html);
   
-        if($this->template == 'listar')
-        {
-            $html = $this->renderDataGrid($html, $this->params);
+        if($this->template == 'listar') {
+            $html = $this->renderDataGrid($html, array_shift($this->params));
         }
-        elseif($this->params)
-        { 
-            $html = $this->renderDynamicData($html, $this->params);
-        }
+
+        $html = $this->renderDynamicData($html, $this->params);
 
         print $html;
     }

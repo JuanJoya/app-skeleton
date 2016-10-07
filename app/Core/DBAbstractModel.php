@@ -23,7 +23,7 @@ abstract class DBAbstractModel
 	/**
 	 * @var string
 	 */
-    protected $dbName = 'DataBase';
+    protected $dbName = 'test';
 	/**
 	 * @var string con sentencia SQL
 	 */

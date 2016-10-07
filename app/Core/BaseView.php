@@ -9,17 +9,13 @@ abstract class BaseView implements Response
      */
 	protected $template;
     /**
-     * @var array|mixed objetos y/o array que se envía a la vista
+     * @var array|mixed objetos y/o array que se envÃ­a a la vista
      */
     protected $params;
     /**
      * @var array multidimensional con el contexto de la vista
      */
     protected $context;
-    /**
-     * @var string mensaje opcional con el estado de la app
-     */
-    protected $message;
 
     /**
      * @param string $template
@@ -28,7 +24,7 @@ abstract class BaseView implements Response
     public function __construct($template='', array $params = [])
     {
         $this->template = $template;
-        $this->resolveParams($params);
+        $this->params = $params;
         $this->setContext();
     }
 
@@ -39,9 +35,9 @@ abstract class BaseView implements Response
 
     /**
      * @param string $resource nombre de la carpeta que contiene las vistas html
-     * implementación del método abstracto de BaseView, construye e imprime el
+     * implementaciÃ³n del mÃ©todo abstracto de BaseView, construye e imprime el
      * contenido html de la vista
-     * @param  boolean indica si se imprime o retorna el contenido html, 
+     * @param  boolean $print indica si se imprime o retorna el contenido html,
      * en caso de sobrescribir el metodo
      * @return string contenido final html
      */
@@ -53,15 +49,13 @@ abstract class BaseView implements Response
 
         if ($print) {
             print $html;
-        }
-        else {
+        } else {
             return $html;
         }
-        
     }
 
     /**
-     * @param  string contenido html 
+     * @param  string $html contenido html
      * @param  array $context
      * @return string contenido html
      */
@@ -80,21 +74,22 @@ abstract class BaseView implements Response
      */
     protected function renderDynamicData($html, $data)
     {
-        foreach ($data as $clave=>$valor) {
-            $html = str_replace('{'.$clave.'}', $valor, $html);
+        foreach ($data as $key => $value) {
+            $html = str_replace('{'.$key.'}', $value, $html);
         }
         return $html;
     }
 
     /**
      * @param string $resource nombre de la carpeta que contiene las vistas html
-     * @param string $form nombre del layout y/o content de la vista html
+     * @param string $template nombre del layout y/o content de la vista html
      * @return string $template string con el contenido literal html
+     * @throws \Exception
      */
-    protected function getTemplate($resource, $form='layout')
+    protected function getTemplate($resource, $template='layout')
     {
         $resource = lcfirst($resource);
-        $file = ROOT.'html'.DS.$resource.DS.$form.'.html';
+        $file = ROOT.'html'.DS.$resource.DS.$template.'.html';
 
         if (!file_exists($file)) {
             throw new \Exception("Error, resource not found");
@@ -102,14 +97,5 @@ abstract class BaseView implements Response
 
         $template = file_get_contents($file);
         return $template;
-    }
-
-    /**
-     * @param array $params data y/o mensaje que viene del controller
-     */
-    private function resolveParams(array $params)
-    {
-        $this->params = array_shift($params);
-        $this->message = array_shift($params);
     }
 }

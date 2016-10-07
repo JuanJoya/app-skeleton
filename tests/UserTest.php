@@ -1,5 +1,7 @@
 <?php
+
 use CustomMVC\User\User;
+
 class UserTest extends PHPUnit_Framework_TestCase
 {
 
@@ -28,5 +30,4 @@ class UserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('joya', $lastName);
         $this->assertEquals(15, $id);
     }
-
 }

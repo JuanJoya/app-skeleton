@@ -5,7 +5,6 @@ use CustomMVC\Core\JsonResponse;
 
 class Controller 
 {
-
     /**
      * @var UserRepository instancia del modelo del usuario
      */
@@ -22,12 +21,11 @@ class Controller
     }
 
     /**
-     * @param array $urlParams
      * @return View template por defecto
      */
-    public function index(array $urlParams=[])
+    public function index()
     {
-        return new View('buscar');
+        return new View('buscar', ['message' => 'up']);
     }
 
     /**
@@ -35,7 +33,7 @@ class Controller
      */
     public function buscar()
     {
-        return new View('buscar');
+        return new View('buscar', ['message' => 'up']);
     }
 
     /**
@@ -46,14 +44,15 @@ class Controller
     {
         $user = $this->userModel->get($this->userData);
         if(empty($user)) {
-            return new View('buscar', [null, $this->userModel->status]);
-        }
-        else
-        {
+
+            return new View('buscar', ['message' => $this->userModel->status]);
+        } else {
             $data['email'] = $user->getEmail();
             $data['nombre'] = $user->getFirstName();
             $data['apellido'] = $user->getLastName();
-            return new View('modificar', [$data, $this->userModel->status]);
+            $data['message'] = $this->userModel->status;
+
+            return new View('modificar', $data);
         }
     }
 
@@ -62,7 +61,7 @@ class Controller
      */
     public function agregar()
     {
-        return new View('agregar');
+        return new View('agregar', ['message' => 'up']);
     }
 
     /**
@@ -71,27 +70,31 @@ class Controller
     public function set()
     {  
         $this->userModel->set($this->userData);
-        return new View('agregar', [null,$this->userModel->status]);
+        return new View('agregar', ['message' => $this->userModel->status]);
     }
 
     /**
      * @return View url = user/listar
-     * $data es una instancia de Illuminate\Support\Collection que almacena
-     * una colección del ValueObject User
+     * $data['users'] es un array construido con Illuminate\Support\Collection que almacena
+     * una colecciÃ³n del ValueObject User
      */
     public function listar()
     {
-        $data = $this->userModel->all();
-        return new View('listar', [$data, $this->userModel->status]);
+        $data['users'] = $this->userModel->all()->toArray();
+        $data['message'] = $this->userModel->status;
+
+        return new View('listar', $data);
     }
 
     /**
-     * @param  array parametros desde la url
-     * @return JsonResponse 
+     * @return JsonResponse
      */
-    public function api(array $urlParams=[])
+    public function api()
     {
         $users = $this->userModel->all()->toArray();
+        /**
+         * * @type User $user
+         */
         foreach ($users as $user) {
             $list[$user->getId()] = [
                 'first_name' => $user->getFirstName(),
@@ -107,7 +110,7 @@ class Controller
      */
     public function borrar()
     {
-        return new View('borrar');
+        return new View('borrar', ['message' => 'up']);
     }
 
     /**
@@ -116,7 +119,7 @@ class Controller
     public function delete()
     {
         $this->userModel->delete($this->userData);
-        return new View('borrar',[null,$this->userModel->status]);
+        return new View('borrar', ['message' => $this->userModel->status]);
     }
 
     /**
@@ -125,7 +128,7 @@ class Controller
     public function edit()
     {
         $this->userModel->edit($this->userData);
-        return new View('buscar',[null,$this->userModel->status]);
+        return new View('buscar', ['message' => $this->userModel->status]);
     }
 
     /**

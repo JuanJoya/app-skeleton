@@ -16,7 +16,7 @@ class JsonResponse implements Response
 	}
 
 	/**
-	 * @param  string nombre del recurso
+	 * @param  string $resource nombre del recurso
 	 */
 	public function render($resource)
 	{
