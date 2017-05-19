@@ -32,19 +32,51 @@ class User
      */
     public function __construct($email, $password, $id = null)
     {
-        if(!is_string($email) || !is_string($password)) {
-            throw new \InvalidArgumentException();
-        }
-
-        $this->email = $email;
-        $this->password = $password;
+        $this->setEmail($email);
+        $this->setPassword($password);
         
         if(is_int($id)) {
             $this->id = $id;
         }   
     }
 
+    public static function create(array $params)
+    {
+        $user = new User(
+            $params['email'], $params['password']
+        );
+        $user->setName($params['firstName'], $params['lastName']);
+
+        return $user;
+    }
+
     /**
+     * @param string $email
+     */
+    public function setEmail($email)
+    {
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException(
+                "Invalid email address: [$email]"
+            );
+        }
+        $this->email = $email;
+    }
+
+    /**
+     * @param string $pass
+     */
+    public function setPassword($pass)
+    {
+        if(! filter_var($pass, FILTER_UNSAFE_RAW)) {
+            throw new \InvalidArgumentException(
+                "Empty password"
+            );
+        }
+        $this->password = $pass;
+    }
+
+        /**
      * @param string $firstName
      * @param string $lastName
      */
@@ -73,7 +105,8 @@ class User
     /**
      * @return string
      */
-    public function getEmail(){
+    public function getEmail()
+    {
         return $this->email;
     }
     

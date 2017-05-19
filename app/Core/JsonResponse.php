@@ -15,13 +15,15 @@ class JsonResponse implements Response
 		$this->value = $value;
 	}
 
-	/**
-	 * @param  string $resource nombre del recurso
-	 */
+    /**
+     * @param  string $resource nombre del recurso
+     * @return string
+     */
 	public function render($resource)
 	{
 		header("Content-Description: api:{$resource}"); 
 		header('Content-type: application/json');
-		echo json_encode($this->value);
+
+        return json_encode($this->value);
 	}
 }

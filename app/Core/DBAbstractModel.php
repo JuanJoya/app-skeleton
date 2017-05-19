@@ -4,7 +4,9 @@ namespace CustomMVC\Core;
 
 abstract class DBAbstractModel
 {
-	/**
+
+    const SQL_DEFAULT_STATE = '00000';
+    /**
 	 * @var string
 	 */
     private static $dbHost = 'localhost';
@@ -42,34 +44,13 @@ abstract class DBAbstractModel
     protected $bindParams = array();
 
 	/**
-	 * @return object|null permite realizar consultas SELECT
-	 */
-    abstract protected function get();
-
-	/**
-	 * permite realizar INSERT
-	 */
-    abstract protected function set();
-
-	/**
-	 * permite realizar UPDATE
-	 */
-    abstract protected function edit();
-
-	/**
-	 * permite realizar DELETE
-	 */
-    abstract protected function delete();
-
-	/**
 	 * @throws \Exception si falla al crear PDO
 	 * Crea el objeto PDO, si este existe, utiliza la misma instancia
 	 * para no crear multiples conexiones a la DB
 	 */
 	private function openConnection()
 	{
-		try
-		{
+		try {
 			if(!self::$conn) {
 				self::$conn = new \PDO(
 					'mysql:host=' . self::$dbHost . ';dbname=' . $this->dbName . ';charset=utf8;',
@@ -78,73 +59,49 @@ abstract class DBAbstractModel
 					array(\PDO::MYSQL_ATTR_FOUND_ROWS => true)
 				);
 			}
-		}
-		catch (\PDOException $e)
-		{
-    		throw new \Exception('Failed to connect to the DB');
+		} catch (\PDOException $e) {
+    		throw new \RuntimeException('Failed to connect to DB.', $e->getCode(), $e);
 		}
 	}
 
 	/**
 	 * @return \PDOStatement $result objeto con los resultados asociados al execute del query
-	 * @throws \Exception
 	 * realiza el binding del query (sentencia preparada), ejecuta el query y retorna el Statement
 	 */
 	private function dbQuery()
 	{
-		try
-		{
-			$result = self::$conn->prepare($this->query);
-			foreach ($this->bindParams as $key => &$param) {
-				$result->bindParam($key, $param);
-			}
-			$result->execute();
-			return $result;
-		}
-		catch (\PDOException $e)
-		{
-    		throw new \Exception('Error running query on the DB');
-		}		
+        $result = self::$conn->prepare($this->query);
+        foreach ($this->bindParams as $key => &$param) {
+            $result->bindParam($key, $param);
+        }
+        $result->execute();
+
+        if ($result->errorCode() !== self::SQL_DEFAULT_STATE) {
+            throw new \RuntimeException("You have an error in your SQL syntax");
+        }
+
+        return $result;
 	}
 
 	/**
 	 * permite ejecutar las sentencias UPDATE, INSERT, DELETE
-	 * @throws \Exception
 	 */
 	protected function executeSingleQuery()
 	{
-		try
-		{
-		    if($_POST) {
-		        $this->openConnection();
-		        $result = $this->dbQuery();
-		        $this->affectedRows = $result->rowCount();
-		        $result = null;
-		    }
-		}
-		catch(\Exception $e)
-		{
-			throw new \Exception('Error running query, '.$e->getMessage());
-		}
+        $this->openConnection();
+        $result = $this->dbQuery();
+        $this->affectedRows = $result->rowCount();
+        $result = null;
 	}
 
 	/**
 	 * permite ejecutar SELECT, modela el resultado (PDOStatement) en un array $rows
-	 * @throws \Exception
 	 */
 	protected function getResultsFromQuery()
 	{
-		try
-		{
-	        $this->openConnection();
-	        $result = $this->dbQuery();
-	        while ($this->rows[] = $result->fetch(\PDO::FETCH_ASSOC));
-	        $result= null;
-	        array_pop($this->rows);			
-		}
-		catch(\Exception $e)
-		{
-			throw new \Exception('Failed to bring results, '.$e->getMessage());
-		}
+        $this->openConnection();
+        $result = $this->dbQuery();
+        $this->rows = $result->fetchAll(\PDO::FETCH_ASSOC);
+        $result = null;
 	}
 }

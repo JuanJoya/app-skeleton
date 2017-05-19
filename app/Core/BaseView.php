@@ -9,7 +9,7 @@ abstract class BaseView implements Response
      */
 	protected $template;
     /**
-     * @var array|mixed objetos y/o array que se envía a la vista
+     * @var array data que se envía a la vista
      */
     protected $params;
     /**
@@ -21,9 +21,9 @@ abstract class BaseView implements Response
      * @param string $template
      * @param array $params data y/o mensaje
      */
-    public function __construct($template='', array $params = [])
+    public function __construct($template, array $params = [])
     {
-        $this->template = $template;
+        $this->setTemplate($template);
         $this->params = $params;
         $this->setContext();
     }
@@ -35,23 +35,17 @@ abstract class BaseView implements Response
 
     /**
      * @param string $resource nombre de la carpeta que contiene las vistas html
-     * implementación del método abstracto de BaseView, construye e imprime el
+     * implementación del método abstracto de BaseView, construye y retorna el
      * contenido html de la vista
-     * @param  boolean $print indica si se imprime o retorna el contenido html,
-     * en caso de sobrescribir el metodo
-     * @return string contenido final html
+     * @return string $html
      */
-    public function render($resource, $print = true)
+    public function render($resource)
     {
         $html = $this->getTemplate($resource);
         $html = str_replace('{content}', $this->getTemplate($resource, $this->template), $html);
         $html = $this->renderContext($html, $this->context);
 
-        if ($print) {
-            print $html;
-        } else {
-            return $html;
-        }
+        return $html;
     }
 
     /**
@@ -72,7 +66,7 @@ abstract class BaseView implements Response
      * @param array $data data a reemplazar en la vista html
      * @return string $html string final con la data
      */
-    protected function renderDynamicData($html, $data)
+    protected function renderDynamicData($html, array $data)
     {
         foreach ($data as $key => $value) {
             $html = str_replace('{'.$key.'}', $value, $html);
@@ -86,16 +80,24 @@ abstract class BaseView implements Response
      * @return string $template string con el contenido literal html
      * @throws \Exception
      */
-    protected function getTemplate($resource, $template='layout')
+    protected function getTemplate($resource, $template = 'layout')
     {
         $resource = lcfirst($resource);
-        $file = ROOT.'html'.DS.$resource.DS.$template.'.html';
+        $file = dirname(dirname(__DIR__)).'/resources/'.$resource.DS.$template.'.html';
 
         if (!file_exists($file)) {
-            throw new \Exception("Error, resource not found");
+            throw new \RuntimeException("Error, resource not found");
         }
 
         $template = file_get_contents($file);
         return $template;
+    }
+
+    private function setTemplate($template)
+    {
+        if (empty($template)) {
+            throw new \InvalidArgumentException('Empty template');
+        }
+        $this->template = $template;
     }
 }

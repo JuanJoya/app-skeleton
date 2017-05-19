@@ -6,11 +6,10 @@ class Controller
 {
 
 	/**
-	 * @param array $urlParams
 	 * @return View instancia de la vista, al constructor se le
 	 * envia el nombre del template
 	 */
-    public function index(array $urlParams=[])
+    public function index()
 	{
     	return new View('home');
     }

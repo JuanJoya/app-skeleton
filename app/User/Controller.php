@@ -38,7 +38,7 @@ class Controller
 
     /**
      * @return View get action del formulario que permite buscar usuarios
-     * $user es una instancia del ValueObject User
+     * $user es una instancia de User
      */
     public function get()
     {
@@ -47,10 +47,10 @@ class Controller
 
             return new View('buscar', ['message' => $this->userModel->status]);
         } else {
-            $data['email'] = $user->getEmail();
-            $data['nombre'] = $user->getFirstName();
+            $data['email']    = $user->getEmail();
+            $data['nombre']   = $user->getFirstName();
             $data['apellido'] = $user->getLastName();
-            $data['message'] = $this->userModel->status;
+            $data['message']  = $this->userModel->status;
 
             return new View('modificar', $data);
         }
@@ -68,19 +68,18 @@ class Controller
      * @return View set action del formulario que permite crear un usuario
      */
     public function set()
-    {  
+    {
         $this->userModel->set($this->userData);
         return new View('agregar', ['message' => $this->userModel->status]);
     }
 
     /**
      * @return View url = user/listar
-     * $data['users'] es un array construido con Illuminate\Support\Collection que almacena
-     * una colección del ValueObject User
+     * $data['users'] es un array que almacena instancias de User
      */
     public function listar()
     {
-        $data['users'] = $this->userModel->all()->toArray();
+        $data['users'] = $this->userModel->all();
         $data['message'] = $this->userModel->status;
 
         return new View('listar', $data);
@@ -91,17 +90,23 @@ class Controller
      */
     public function api()
     {
-        $users = $this->userModel->all()->toArray();
+        $users = $this->userModel->all();
+        $list = array();
         /**
-         * * @type User $user
-         */
-        foreach ($users as $user) {
-            $list[$user->getId()] = [
-                'first_name' => $user->getFirstName(),
-                'last_name'  => $user->getLastName(),
-                'email'      => $user->getEmail()
-            ];
+         * @type User $user
+        */
+        if ($users) {
+            foreach ($users as $user) {
+                $list[$user->getId()] = [
+                    'first_name' => $user->getFirstName(),
+                    'last_name'  => $user->getLastName(),
+                    'email'      => $user->getEmail()
+                ];
+            }
+        } else {
+            $list['error'] = $this->userModel->status;
         }
+
         return new JsonResponse($list);
     }  
 
@@ -118,7 +123,7 @@ class Controller
      */
     public function delete()
     {
-        $this->userModel->delete($this->userData);
+        $this->userModel->delete($this->userData['email']);
         return new View('borrar', ['message' => $this->userModel->status]);
     }
 
@@ -137,21 +142,19 @@ class Controller
      */
     public function helperUserData() 
     {
-        $this->userData = [];
         if($_POST) {
             $this->userData = array_map('trim',$_POST);
             $args = [
-                'nombre'    => FILTER_SANITIZE_STRING,
-                'apellido'  => FILTER_SANITIZE_STRING,
+                'first_name'    => FILTER_SANITIZE_STRING,
+                'last_name'  => FILTER_SANITIZE_STRING,
                 'email'     => FILTER_VALIDATE_EMAIL,
-                'clave'     => FILTER_UNSAFE_RAW,
+                'password'     => FILTER_UNSAFE_RAW,
             ];  
             $this->userData = filter_var_array($this->userData, $args, false);
-        } 
-        elseif(isset($_GET['email'])) {
+
+        } elseif(isset($_GET['email'])) {
             $this->userData = array_map('trim',$_GET);
             $this->userData = filter_var($this->userData['email'], FILTER_VALIDATE_EMAIL);
         }
-        return $this->userData;
     }
 }

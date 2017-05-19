@@ -2,7 +2,6 @@
 
 namespace CustomMVC\User;
 use CustomMVC\Core\BaseView;
-use Illuminate\Support\Collection;
 
 class View extends BaseView
 {
@@ -46,13 +45,12 @@ class View extends BaseView
      * @param array $data instancias de User para generar la grilla
      * @return string
      */
-    protected function renderDataGrid($html, array $data = null)
+    protected function renderDataGrid($html, array $data = [])
     {
         $grid='';
-        if($data)
-        {
+        if($data) {
             foreach ($data as $user) {
-                $grid.="
+                $grid .= "
                     <tr>
                         <td>".$user->getFirstName()."</td>
                         <td>".$user->getLastName()."</td>
@@ -61,20 +59,20 @@ class View extends BaseView
             }            
         }
         $html = str_replace('{data_grid}', $grid, $html);
+
         return $html;
     }
 
     /**
      * @param string $resource nombre de la carpeta que contiene las vistas html
-     * implementación del método abstracto de BaseView, construye e imprime el
+     * implementación del método abstracto de BaseView, construye y retorna el
      * contenido html de la vista
-     * @param bool $print
-     * @return string
+     * @return string $html
      */
-    public function render($resource, $print = true)
+    public function render($resource)
     {
         $subtitle = array_shift($this->context);
-        $html = parent::render($resource, false);
+        $html = parent::render($resource);
         $html = str_replace('{subtitle}', $subtitle[$this->template], $html);
   
         if($this->template == 'listar') {
@@ -83,7 +81,7 @@ class View extends BaseView
 
         $html = $this->renderDynamicData($html, $this->params);
 
-        print $html;
+        return $html;
     }
 
 }

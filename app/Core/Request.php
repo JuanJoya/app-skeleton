@@ -102,13 +102,13 @@ class Request
     }
 
     /**
-     * @return string $name_space construye el namespace para poder instanciar
+     * @return string $namespace construye el namespace para poder instanciar
      * el controller del recurso
      */
-    protected function getResourceNameSpace()
+    protected function getResourceNamespace()
     {
-        $name_space = "CustomMVC\\$this->resource\\Controller";
-        return $name_space;
+        $namespace = "CustomMVC\\$this->resource\\Controller";
+        return $namespace;
     }
 
     /**
@@ -123,27 +123,27 @@ class Request
     {
         $event = $this->event;
         $path = $this->getResourcePath();
-        $controller = $this->getResourceNameSpace();
+        $controller = $this->getResourceNamespace();
 
         if (!file_exists($path) || !method_exists($controller, $event)) {
             $event = 'error';
             $this->resource = $this->defaultResource;
-            $controller = $this->getResourceNameSpace();
+            $controller = $this->getResourceNamespace();
         }
 
         $response = new $controller;
         $response = $response->$event($this->params);
 
         $this->validateResponse($response);
-
     }
+
     /**
      * @param  mixed response que retorna el controlador
      */
     protected function validateResponse($response)
     { 
         if ($response instanceof Response) {
-            $response->render($this->resource);
+            print $response->render($this->resource);
         }
         else {
             header($_SERVER["SERVER_PROTOCOL"]." 500 Internal Server Error"); 

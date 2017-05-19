@@ -2,7 +2,6 @@
 
 namespace CustomMVC\User;
 use CustomMVC\Core\DBAbstractModel;
-use Illuminate\Support\Collection;
 
 class UserRepository extends DBAbstractModel 
 {
@@ -12,22 +11,25 @@ class UserRepository extends DBAbstractModel
     public $status;
 
     /**
-     * @return Collection|null
+     * @return array
      * permite consultar todos los usuarios
      */
     public function all()
     {
-        try
-        {
+        try {
             $this->query = "SELECT * FROM users";
             $this->getResultsFromQuery();
-            $this->status = 'Usuarios Registrados';
             $data = $this->mapToUsers($this->rows);
 
-            return $data;
-        }
-        catch(\Exception $e)
-        {
+            if (empty($data)) {
+                $this->status = 'No hay Registros.';
+                return null;
+            } else {
+                $this->status = 'Usuarios Registrados';
+                return $data;
+            }
+        } catch(\Exception $e) {
+
             $this->status = $e->getMessage();
             return null;
         }
@@ -39,10 +41,9 @@ class UserRepository extends DBAbstractModel
      * implementación del método abstracto, permite consultar un usuario
      * modela el resultado en una instancia de User
      */
-    public function get($userEmail='')
+    public function get($userEmail)
     {
-        try
-        {
+        try {
             if(!empty($userEmail)) {
                 $this->query = "
                     SELECT      id, first_name, last_name, email, password
@@ -64,10 +65,10 @@ class UserRepository extends DBAbstractModel
                 $this->status = 'No sé ha introducido un email valido.';
                 return null;
             }
-        }
-        catch(\Exception $e)
-        {
+        } catch(\Exception $e) {
+
             $this->status = $e->getMessage();
+            return null;
         }
     }
 
@@ -75,26 +76,25 @@ class UserRepository extends DBAbstractModel
      * @param array $userData información que proviene de la vista para crear un usuario
      * permite guardar un usuario en la DB
      */
-    public function set($userData=array())
+    public function set(array $userData)
     {
-        try
-        {
+        try {
             if(!empty($userData['email'])) {
                 $anUser = $this->get($userData['email']);
-                $anUser ? $userEmail = $anUser->getEmail() : $userEmail = '';
+                $anUser ? $anUser = true : $anUser = false;
 
-                if($userData['email'] != $userEmail) {
+                if(!$anUser) {
                     $this->query = "
-                            INSERT INTO     users
-                            (first_name, last_name, email, password)
+                            INSERT INTO users
+                              (first_name, last_name, email, password)
                             VALUES
-                            (:first_name, :last_name, :email, :password)
+                              (:first_name, :last_name, :email, :password)
                     ";
                     $this->bindParams = [
-                        ':first_name' => $userData['nombre'],
-                        ':last_name' => $userData['apellido'],
+                        ':first_name' => $userData['first_name'],
+                        ':last_name' => $userData['last_name'],
                         ':email' => $userData['email'],
-                        ':password' => password_hash($userData['clave'], PASSWORD_DEFAULT),
+                        ':password' => password_hash($userData['password'], PASSWORD_DEFAULT),
                     ];
                     $this->executeSingleQuery();
                     $this->status = 'Usuario agregado exitosamente';
@@ -104,9 +104,7 @@ class UserRepository extends DBAbstractModel
             } else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
-        }
-        catch(\Exception $e)
-        {
+        } catch(\Exception $e) {
             $this->status = $e->getMessage();
         }
     }
@@ -114,10 +112,9 @@ class UserRepository extends DBAbstractModel
     /**
      * @param array $userData información que proviene de la vista para modificar un usuario
      */
-    public function edit($userData=array())
+    public function edit(array $userData)
     {
-        try
-        {
+        try {
             if(!empty($userData['email'])) {
                 $this->query = "
                         UPDATE      users
@@ -126,8 +123,8 @@ class UserRepository extends DBAbstractModel
                         WHERE       email = :email
                 ";
                 $this->bindParams = [
-                    ':first_name' => $userData['nombre'],
-                    ':last_name' => $userData['apellido'],
+                    ':first_name' => $userData['first_name'],
+                    ':last_name' => $userData['last_name'],
                     ':email' => $userData['email'],
                 ];        
                 $this->executeSingleQuery();
@@ -140,26 +137,23 @@ class UserRepository extends DBAbstractModel
             } else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
-        }
-        catch(\Exception $e)
-        {
+        } catch(\Exception $e) {
             $this->status = $e->getMessage();
         }   
     }
 
     /**
-     * @param array $userEmail array con el email del usuario a eliminar
+     * @param string $userEmail email del usuario a eliminar
      */
-    public function delete($userEmail=array())
+    public function delete($userEmail='')
     {
-        try
-        {
-            if(!empty($userEmail['email'])) {
+        try {
+            if(!empty($userEmail)) {
                 $this->query = "
                         DELETE FROM     users
                         WHERE           email = :email
                 ";
-                $this->bindParams = [':email' => $userEmail['email']];
+                $this->bindParams = [':email' => $userEmail];
                 $this->executeSingleQuery();
 
                 if($this->affectedRows) {
@@ -170,25 +164,24 @@ class UserRepository extends DBAbstractModel
             } else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
-        }
-        catch(\Exception $e)
-        {
+        } catch(\Exception $e) {
             $this->status = $e->getMessage();
         }   
     }
 
     /**
      * @param array $results array $rows con los usuarios
-     * @return Collection con instancias de User
-     * permite modelar una colección de usuarios
+     * @return array con instancias de User
+     * permite modelar un array de usuarios
      */
     private function mapToUsers(array $results)
     {
-        $users = new Collection();
+        $users = array();
         foreach ($results as $result) {
             $user = $this->mapEntity($result);
-            $users->push($user);
+            $users[] = $user;
         }
+
         return $users;
     }
 
@@ -207,6 +200,7 @@ class UserRepository extends DBAbstractModel
             $result['first_name'],
             $result['last_name']
         );
+
         return $user;
     }
 }
