@@ -26,9 +26,9 @@ class User
     private $password;
     
     /**
-     * @param string $email    correo con formato valido
+     * @param string $email correo con formato valido
      * @param string $password hash de una contraseña
-     * @param int    $id       id del usuario en la base de datos
+     * @param int $id
      */
     public function __construct($email, $password, $id = null)
     {
@@ -40,12 +40,17 @@ class User
         }   
     }
 
+    /**
+     * Helper para crear User desde resultSet
+     * @param array $params
+     * @return User
+     */
     public static function create(array $params)
     {
         $user = new User(
-            $params['email'], $params['password']
+            $params['email'], $params['password'], (int)$params['id']
         );
-        $user->setName($params['firstName'], $params['lastName']);
+        $user->setName($params['first_name'], $params['last_name']);
 
         return $user;
     }

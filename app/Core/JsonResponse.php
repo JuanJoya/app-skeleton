@@ -8,7 +8,7 @@ class JsonResponse implements Response
 	 * array de datos a codificar en json
 	 * @var array
 	 */
-	protected $value = [];
+	protected $value = array();
 
 	public function __construct(array $value = [])
 	{

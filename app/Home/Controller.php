@@ -7,7 +7,7 @@ class Controller
 
 	/**
 	 * @return View instancia de la vista, al constructor se le
-	 * envia el nombre del template
+	 * envia el nombre del template.
 	 */
     public function index()
 	{
@@ -15,7 +15,7 @@ class Controller
     }
 
 	/**
-	 * evento en caso de error en la URL
+	 * Action en caso de error en la URL.
 	 * @return View
 	 */
  	public function error()

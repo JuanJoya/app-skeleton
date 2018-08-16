@@ -15,11 +15,9 @@ error_reporting(E_ALL);
 
 /**
  * constantes utilizadas en la app
- * URL = ruta 'URI' de la aplicación utilizada para generar 'routes', evita
- * el uso de VirtualHost 
+ * URL = String con los directorios necesarios para llegar a la carpeta 'public' en apache.
  */
-define('DS', DIRECTORY_SEPARATOR);
-define('URL', "http://localhost/Proyectos/custom-mvc/public/");
+define('URL', str_replace(basename( $_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) );
 
 $app = new Application( $_GET['url'] );
 $app->run();

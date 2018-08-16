@@ -12,7 +12,7 @@ class Controller
     /**
      * @var array|mixed data que proviene de los formularios
      */
-    private $userData;
+    private $userData = [];
 
     public function __construct()
     {
@@ -44,15 +44,14 @@ class Controller
     {
         $user = $this->userModel->get($this->userData);
         if(empty($user)) {
-
             return new View('buscar', ['message' => $this->userModel->status]);
         } else {
-            $data['email']    = $user->getEmail();
-            $data['nombre']   = $user->getFirstName();
-            $data['apellido'] = $user->getLastName();
-            $data['message']  = $this->userModel->status;
-
-            return new View('modificar', $data);
+            return new View('modificar', [
+                'email'    => $user->getEmail(),
+                'nombre'   => $user->getFirstName(),
+                'apellido' => $user->getLastName(),
+                'message'  => $this->userModel->status
+            ]);
         }
     }
 
@@ -75,14 +74,13 @@ class Controller
 
     /**
      * @return View url = user/listar
-     * $data['users'] es un array que almacena instancias de User
      */
     public function listar()
     {
-        $data['users'] = $this->userModel->all();
-        $data['message'] = $this->userModel->status;
-
-        return new View('listar', $data);
+        return new View('listar', [
+            'users'   => $this->userModel->all(),
+            'message' => $this->userModel->status
+        ]);
     }
 
     /**
@@ -90,24 +88,9 @@ class Controller
      */
     public function api()
     {
-        $users = $this->userModel->all();
-        $list = array();
-        /**
-         * @type User $user
-        */
-        if ($users) {
-            foreach ($users as $user) {
-                $list[$user->getId()] = [
-                    'first_name' => $user->getFirstName(),
-                    'last_name'  => $user->getLastName(),
-                    'email'      => $user->getEmail()
-                ];
-            }
-        } else {
-            $list['error'] = $this->userModel->status;
-        }
-
-        return new JsonResponse($list);
+        return new JsonResponse(
+            $this->userModel->allToArray()
+        );
     }  
 
     /**
@@ -132,7 +115,7 @@ class Controller
      */
     public function edit()
     {
-        $this->userModel->edit($this->userData);
+        $this->userModel->update($this->userData);
         return new View('buscar', ['message' => $this->userModel->status]);
     }
 
@@ -145,10 +128,10 @@ class Controller
         if($_POST) {
             $this->userData = array_map('trim',$_POST);
             $args = [
-                'first_name'    => FILTER_SANITIZE_STRING,
+                'first_name' => FILTER_SANITIZE_STRING,
                 'last_name'  => FILTER_SANITIZE_STRING,
-                'email'     => FILTER_VALIDATE_EMAIL,
-                'password'     => FILTER_UNSAFE_RAW,
+                'email'      => FILTER_VALIDATE_EMAIL,
+                'password'   => FILTER_UNSAFE_RAW,
             ];  
             $this->userData = filter_var_array($this->userData, $args, false);
 

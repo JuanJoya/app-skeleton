@@ -5,64 +5,68 @@ namespace CustomMVC\Core;
 class Request
 {
     /**
-     * @var string con la URL del Request
+     * @var string URL del Request.
      */
     private $url;
+
     /**
-     * @var string primer parámetro de la URL con el nombre del recurso
+     * @var string primer parámetro de la URL con el nombre del recurso.
      */
     private $resource;
+
     /**
-     * @var string nombre por defecto del recurso
+     * @var string nombre por defecto del recurso.
      */
     private $defaultResource = 'Home';
+
     /**
-     * @var string segundo parámetro de la URL con el nombre del evento
-     * (function) a ejecutar en el controller
+     * @var string segundo parámetro de la URL con el nombre del action
+     * (function) a ejecutar en el controller.
      */
-    private $event;
+    private $action;
+
     /**
-     * @var string nombre por defecto del evento
+     * @var string nombre por defecto del action.
      */
-    private $defaultEvent = 'index';
+    private $defaultAction = 'index';
+
     /**
-     * @var array parámetros adicionales de la URL
+     * @var string action que retorna error 404.
+     */
+    private $invalidAction = 'error';
+
+    /**
+     * @var array parámetros adicionales de la URL.
      */
     private $params = array();
 
     /**
-     * @param string $url string con la URL del Request
+     * @param string $url URL del Request.
      */
-    public function __construct($url)
+    public function __construct($url = '')
     {
         $this->url = $url;
         $this->resolveUrl();
     }
 
     /**
-     * @return string devuelve la URL del request
+     * Se divide la URL en un array para analizar cada segmento.
+     * @return void
      */
-    public function getUrl()
-    {
-        return $this->url;
-    }
-
-    /**
-     * se divide la URL en un array para analizar cada segmento
-     */
-    protected function resolveUrl()
+    private function resolveUrl()
     {
         $segments = explode('/', $this->getUrl());
         $this->resolveResource($segments);
-        $this->resolveEvent($segments);
+        $this->resolveAction($segments);
         $this->resolveParams($segments);
     }
 
     /**
      * @param array $segments
-     * resuelve el primer segmento de la URL para identificar el recurso
+     * Resuelve el primer segmento de la URL para identificar el recurso.
+     * @return void
      */
-    protected function resolveResource(&$segments)
+    private function resolveResource(&$segments)
     {
         $this->resource = ucfirst(array_shift($segments));
         if (empty($this->resource)) {
@@ -72,78 +76,115 @@ class Request
 
     /**
      * @param array $segments
-     * resuelve el segundo segmento de la URL para identificar el evento
+     * Resuelve el segundo segmento de la URL para identificar el action.
+     * @return void
      */
-    protected function resolveEvent(&$segments)
+    private function resolveAction(&$segments)
     {
-        $this->event = array_shift($segments);
-        if (empty($this->event)) {
-            $this->event = $this->defaultEvent;
+        $this->action = array_shift($segments);
+        if (empty($this->action)) {
+            $this->action = $this->defaultAction;
         }
     }
 
     /**
      * @param array $segments
-     * resuelve el segmento final de la URL para identificar los parámetros
-     * opcionales de la URL
+     * Resuelve el segmento final de la URL para identificar los parámetros
+     * opcionales de la URL.
+     * @return void
      */
-    protected function resolveParams(&$segments)
+    private function resolveParams(&$segments)
     {
         $this->params = $segments;
     }
 
     /**
-     * @return string $path ruta del directorio del recurso en el servidor
+     * @return string $path ruta del directorio del recurso en el servidor.
      */
-    protected function getResourcePath()
+    private function getResourcePath()
     {
-    	$path = dirname(__DIR__).DS.$this->resource;
+        $path = dirname(__DIR__) . '/' . $this->resource;
     	return $path;
     }
 
     /**
      * @return string $namespace construye el namespace para poder instanciar
-     * el controller del recurso
+     * el controller del recurso.
      */
-    protected function getResourceNamespace()
+    private function getResourceNamespace()
     {
-        $namespace = "CustomMVC\\$this->resource\\Controller";
+        $namespace = "CustomMVC\\{$this->resource}\\Controller";
         return $namespace;
     }
 
     /**
-     * Identifica si el recurso existe en el servidor, luego si el evento del
-     * recurso existe, si no existe se genera un error 404
-     * se instancia el controller adecuado, se llama al evento con los parámetros
-     * adicionales
-     * el evento del controller retorna una instancia de View o cualquier clase que 
-     * implemente Response, Se renderiza la vista
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAction()
+    {
+        return $this->action;
+    }
+
+    /**
+     * @return array
+     */
+    public function getParams()
+    {
+        return $this->params;
+    }
+
+    /**
+     * Se instancia el controller adecuado, se llama el action con los parámetros opcionales, 
+     * se valida lo que retorne el action del Controller.
+     * @return void
      */
     public function execute()
     {
-        $event = $this->event;
-        $path = $this->getResourcePath();
-        $controller = $this->getResourceNamespace();
+        $this->validateRequest(
+            $this->getResourcePath(),
+            $this->getResourceNamespace(),
+            $this->getAction()
+        );
 
-        if (!file_exists($path) || !method_exists($controller, $event)) {
-            $event = 'error';
-            $this->resource = $this->defaultResource;
-            $controller = $this->getResourceNamespace();
-        }
-
-        $response = new $controller;
-        $response = $response->$event($this->params);
+        $resource   = $this->getResourceNamespace();
+        $controller = new $resource; 
+        $response   = call_user_func_array([$controller, $this->getAction()], $this->getParams());
 
         $this->validateResponse($response);
     }
 
     /**
-     * @param  mixed response que retorna el controlador
+     * Identifica si el recurso existe en el servidor y si el action del recurso esta definido, 
+     * si no existe se setea un action que retorna una vista 404.
+     * @param string $path
+     * @param string $className
+     * @param string $method
+     * @return void
      */
-    protected function validateResponse($response)
+    private function validateRequest($path, $className, $method)
+    {
+        if (!file_exists($path) || !method_exists($className, $method)) {
+            $this->action   = $this->invalidAction;
+            $this->resource = $this->defaultResource;
+        }
+    }
+
+    /**
+     * @param  mixed response que retorna el controlador.
+     * @return void
+     */
+    private function validateResponse($response)
     { 
         if ($response instanceof Response) {
-            print $response->render($this->resource);
+            echo $response->render($this->resource);
         }
         else {
             header($_SERVER["SERVER_PROTOCOL"]." 500 Internal Server Error"); 

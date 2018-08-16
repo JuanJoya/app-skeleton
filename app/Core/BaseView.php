@@ -11,11 +11,7 @@ abstract class BaseView implements Response
     /**
      * @var array data que se envía a la vista
      */
-    protected $params;
-    /**
-     * @var array multidimensional con el contexto de la vista
-     */
-    protected $context;
+    protected $params = array();
 
     /**
      * @param string $template
@@ -23,15 +19,17 @@ abstract class BaseView implements Response
      */
     public function __construct($template, array $params = [])
     {
-        $this->setTemplate($template);
+        if (empty($template)) {
+            throw new \InvalidArgumentException('Empty template');
+        }
+        $this->template = $template;
         $this->params = $params;
-        $this->setContext();
     }
 
     /**
-     * setea el contenido de la variable $this->context
+     * @return array contexto de la vista
      */
-	abstract protected function setContext();
+	abstract protected function getContext();
 
     /**
      * @param string $resource nombre de la carpeta que contiene las vistas html
@@ -43,21 +41,8 @@ abstract class BaseView implements Response
     {
         $html = $this->getTemplate($resource);
         $html = str_replace('{content}', $this->getTemplate($resource, $this->template), $html);
-        $html = $this->renderContext($html, $this->context);
+        $html = $this->renderDynamicData($html, $this->getContext());
 
-        return $html;
-    }
-
-    /**
-     * @param  string $html contenido html
-     * @param  array $context
-     * @return string contenido html
-     */
-    protected function renderContext($html, array $context)
-    {
-        foreach ($context as $data) {
-            $html = $this->renderDynamicData($html, $data);
-        }
         return $html;
     }
 
@@ -66,7 +51,7 @@ abstract class BaseView implements Response
      * @param array $data data a reemplazar en la vista html
      * @return string $html string final con la data
      */
-    protected function renderDynamicData($html, array $data)
+    protected function renderDynamicData($html, array $data = [])
     {
         foreach ($data as $key => $value) {
             $html = str_replace('{'.$key.'}', $value, $html);
@@ -78,26 +63,16 @@ abstract class BaseView implements Response
      * @param string $resource nombre de la carpeta que contiene las vistas html
      * @param string $template nombre del layout y/o content de la vista html
      * @return string $template string con el contenido literal html
-     * @throws \Exception
      */
     protected function getTemplate($resource, $template = 'layout')
     {
         $resource = lcfirst($resource);
-        $file = dirname(dirname(__DIR__)).'/resources/'.$resource.DS.$template.'.html';
-
+        $file = dirname(dirname(__DIR__)) . '/resources/' . $resource . '/' . $template . '.html';
         if (!file_exists($file)) {
             throw new \RuntimeException("Error, resource not found");
         }
-
         $template = file_get_contents($file);
-        return $template;
-    }
 
-    private function setTemplate($template)
-    {
-        if (empty($template)) {
-            throw new \InvalidArgumentException('Empty template');
-        }
-        $this->template = $template;
+        return $template;
     }
 }

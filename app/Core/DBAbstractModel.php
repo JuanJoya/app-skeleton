@@ -17,7 +17,7 @@ abstract class DBAbstractModel
 	/**
 	 * @var string
 	 */
-    private static $dbPass = 'root';
+    private static $dbPass = '';
 	/**
 	 * @var \PDO objeto que permite trabajar con la DB
 	 */
@@ -27,7 +27,7 @@ abstract class DBAbstractModel
 	 */
     protected $dbName = 'test';
 	/**
-	 * @var string con sentencia SQL
+	 * @var string sentencia SQL
 	 */
     protected $query;
 	/**
@@ -39,7 +39,7 @@ abstract class DBAbstractModel
 	 */
     protected $affectedRows;
 	/**
-	 * @var array con los parámetros para el binding del query
+	 * @var array parámetros para el binding del query
 	 */
     protected $bindParams = array();
 
@@ -47,6 +47,7 @@ abstract class DBAbstractModel
 	 * @throws \Exception si falla al crear PDO
 	 * Crea el objeto PDO, si este existe, utiliza la misma instancia
 	 * para no crear multiples conexiones a la DB
+	 * @return void
 	 */
 	private function openConnection()
 	{
@@ -58,6 +59,7 @@ abstract class DBAbstractModel
 					self::$dbPass,
 					array(\PDO::MYSQL_ATTR_FOUND_ROWS => true)
 				);
+				self::$conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 			}
 		} catch (\PDOException $e) {
     		throw new \RuntimeException('Failed to connect to DB.', $e->getCode(), $e);
@@ -85,17 +87,19 @@ abstract class DBAbstractModel
 
 	/**
 	 * permite ejecutar las sentencias UPDATE, INSERT, DELETE
+	 * @return void
 	 */
 	protected function executeSingleQuery()
 	{
         $this->openConnection();
         $result = $this->dbQuery();
-        $this->affectedRows = $result->rowCount();
+		$this->affectedRows = $result->rowCount();
         $result = null;
 	}
 
 	/**
 	 * permite ejecutar SELECT, modela el resultado (PDOStatement) en un array $rows
+	 * @return void
 	 */
 	protected function getResultsFromQuery()
 	{

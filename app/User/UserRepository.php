@@ -11,7 +11,7 @@ class UserRepository extends DBAbstractModel
     public $status;
 
     /**
-     * @return array
+     * @return array|null
      * permite consultar todos los usuarios
      */
     public function all()
@@ -19,26 +19,42 @@ class UserRepository extends DBAbstractModel
         try {
             $this->query = "SELECT * FROM users";
             $this->getResultsFromQuery();
-            $data = $this->mapToUsers($this->rows);
 
-            if (empty($data)) {
+            if (empty($this->rows)) {
                 $this->status = 'No hay Registros.';
                 return null;
             } else {
                 $this->status = 'Usuarios Registrados';
-                return $data;
+                return $this->mapToUsers($this->rows);
             }
-        } catch(\Exception $e) {
-
+        } catch(\RuntimeException $e) {
             $this->status = $e->getMessage();
             return null;
         }
     }
 
     /**
+     * @return array
+     */
+    public function allToArray() 
+    {
+        $users = $this->all();
+        if($users) {
+            return array_map(function (User $user) {
+                return [
+                    'id' => $user->getId(),
+                    'first_name' => $user->getFirstName(),
+                    'last_name'  => $user->getLastName(),
+                    'email'      => $user->getEmail()
+                ];
+            }, $users);
+        } 
+        return ['error' => $this->status];
+    }
+
+    /**
      * @param string $userEmail
      * @return User|null instancia de User con la información del usuario
-     * implementación del método abstracto, permite consultar un usuario
      * modela el resultado en una instancia de User
      */
     public function get($userEmail)
@@ -54,9 +70,8 @@ class UserRepository extends DBAbstractModel
                 $this->getResultsFromQuery();
 
                 if(count($this->rows) == 1) {
-                    $this->status = 'Usuario encontrado';
-                    $data = $this->mapEntity(array_shift($this->rows));     
-                    return $data;
+                    $this->status = 'Usuario encontrado';   
+                    return $this->mapEntity(array_shift($this->rows));  
                 } else {
                     $this->status = 'Usuario no encontrado';
                     return null;
@@ -65,8 +80,7 @@ class UserRepository extends DBAbstractModel
                 $this->status = 'No sé ha introducido un email valido.';
                 return null;
             }
-        } catch(\Exception $e) {
-
+        } catch(\RuntimeException $e) {
             $this->status = $e->getMessage();
             return null;
         }
@@ -74,27 +88,23 @@ class UserRepository extends DBAbstractModel
 
     /**
      * @param array $userData información que proviene de la vista para crear un usuario
-     * permite guardar un usuario en la DB
      */
     public function set(array $userData)
     {
         try {
             if(!empty($userData['email'])) {
-                $anUser = $this->get($userData['email']);
-                $anUser ? $anUser = true : $anUser = false;
-
-                if(!$anUser) {
+                 if(empty($this->get($userData['email']))) {
                     $this->query = "
-                            INSERT INTO users
-                              (first_name, last_name, email, password)
-                            VALUES
-                              (:first_name, :last_name, :email, :password)
+                        INSERT INTO users
+                            (first_name, last_name, email, password)
+                        VALUES
+                            (:first_name, :last_name, :email, :password)
                     ";
                     $this->bindParams = [
                         ':first_name' => $userData['first_name'],
-                        ':last_name' => $userData['last_name'],
-                        ':email' => $userData['email'],
-                        ':password' => password_hash($userData['password'], PASSWORD_DEFAULT),
+                        ':last_name'  => $userData['last_name'],
+                        ':email'      => $userData['email'],
+                        ':password'   => password_hash($userData['password'], PASSWORD_DEFAULT),
                     ];
                     $this->executeSingleQuery();
                     $this->status = 'Usuario agregado exitosamente';
@@ -104,7 +114,7 @@ class UserRepository extends DBAbstractModel
             } else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
-        } catch(\Exception $e) {
+        } catch(\RuntimeException $e) {
             $this->status = $e->getMessage();
         }
     }
@@ -112,20 +122,20 @@ class UserRepository extends DBAbstractModel
     /**
      * @param array $userData información que proviene de la vista para modificar un usuario
      */
-    public function edit(array $userData)
+    public function update(array $userData)
     {
         try {
             if(!empty($userData['email'])) {
                 $this->query = "
-                        UPDATE      users
-                        SET         first_name = :first_name,
-                                    last_name = :last_name
-                        WHERE       email = :email
+                    UPDATE      users
+                    SET         first_name = :first_name,
+                                last_name = :last_name
+                    WHERE       email = :email
                 ";
                 $this->bindParams = [
                     ':first_name' => $userData['first_name'],
-                    ':last_name' => $userData['last_name'],
-                    ':email' => $userData['email'],
+                    ':last_name'  => $userData['last_name'],
+                    ':email'      => $userData['email'],
                 ];        
                 $this->executeSingleQuery();
 
@@ -137,7 +147,7 @@ class UserRepository extends DBAbstractModel
             } else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
-        } catch(\Exception $e) {
+        } catch(\RuntimeException $e) {
             $this->status = $e->getMessage();
         }   
     }
@@ -145,13 +155,13 @@ class UserRepository extends DBAbstractModel
     /**
      * @param string $userEmail email del usuario a eliminar
      */
-    public function delete($userEmail='')
+    public function delete($userEmail)
     {
         try {
             if(!empty($userEmail)) {
                 $this->query = "
-                        DELETE FROM     users
-                        WHERE           email = :email
+                    DELETE FROM     users
+                    WHERE           email = :email
                 ";
                 $this->bindParams = [':email' => $userEmail];
                 $this->executeSingleQuery();
@@ -164,22 +174,21 @@ class UserRepository extends DBAbstractModel
             } else {
                 $this->status = 'No sé ha introducido un email valido.';
             }
-        } catch(\Exception $e) {
+        } catch(\RuntimeException $e) {
             $this->status = $e->getMessage();
         }   
     }
 
     /**
-     * @param array $results array $rows con los usuarios
-     * @return array con instancias de User
+     * @param array $results resultSet con los usuarios
+     * @return array instancias de User
      * permite modelar un array de usuarios
      */
     private function mapToUsers(array $results)
     {
         $users = array();
         foreach ($results as $result) {
-            $user = $this->mapEntity($result);
-            $users[] = $user;
+            $users[] = $this->mapEntity($result);
         }
 
         return $users;
@@ -191,16 +200,6 @@ class UserRepository extends DBAbstractModel
      */
     private function mapEntity(array $result)
     {
-        $user = new User(
-            $result['email'],
-            $result['password'],
-            (int)$result['id']
-        );
-        $user->setName(
-            $result['first_name'],
-            $result['last_name']
-        );
-
-        return $user;
+        return User::create($result);
     }
 }

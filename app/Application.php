@@ -2,7 +2,6 @@
 
 namespace CustomMVC;
 use CustomMVC\Core\Request;
-use CustomMVC\Core\Helper;
 
 class Application {
     /**
@@ -15,11 +14,12 @@ class Application {
      */
     public function __construct($url)
     {
-        $this->url = Helper::cleanUrl($url);
+        $this->url = cleanUrl($url);
     }
 
     /**
      * Crea una instancia de Request para analizar la URL y ejecutar la petición
+     * @return void
      */
     public function run()
     {
