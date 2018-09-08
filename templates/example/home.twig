@@ -1,0 +1,16 @@
+{% extends "example/layout.twig" %}
+
+{% block title %}Home{% endblock %}
+{% block content %}
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-4">
+            <div class="list-group list-group-flush text-center">
+                <a class="list-group-item list-group-item-action" href="{{ url('/redirect') }}">Redirect Response</a>
+                <a class="list-group-item list-group-item-action" href="{{ url('/json') }}">JSON Response</a>
+                <a class="list-group-item list-group-item-action" href="{{ url('/array-paginate') }}">Array Paginate</a>
+                <a class="list-group-item list-group-item-action" href="{{ url('/orm-paginate') }}">Eloquent Paginate</a>
+                <a class="list-group-item list-group-item-action" href="{{ url('/create') }}">Eloquent & Validate</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

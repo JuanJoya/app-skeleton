@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{% endblock %} - Skeleton</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url('/static/css/styles.css') }}">
+</head>
+<body>
+<div class="container">
+    <div class="row mt-5">
+        <div class="col">
+            <h1 class="text-black-50">PHP Skeleton</h1>
+            <p class="lead">
+                Example structure to build applications in PHP without a framework.
+            </p>
+            <hr>
+            <nav class="nav justify-content-center">
+                <a class="nav-link text-secondary bg-light" href="{{ url('/') }}">
+                    <span class="oi oi-home text-primary pr-1"></span>Home
+                </a>
+                <a class="nav-link text-secondary bg-light" href="{{ url('1234') }}">
+                    <span class="oi oi-ban text-danger pr-1"></span>404
+                </a>
+                <a class="nav-link text-secondary bg-light" target="_blank" href="https://github.com/JuanJoya/app-skeleton">
+                    <span class="oi oi-fork text-success pr-1"></span>Github
+                </a>
+            </nav>
+            <br>
+        </div>
+    </div>
+    {% block content %}{% endblock %}
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+{% block js %}{% endblock %}
+</body>
+</html>

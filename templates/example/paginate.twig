@@ -1,0 +1,45 @@
+{% extends "example/layout.twig" %}
+
+{% block title %}Paginate{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col text-center">
+            {% if users.count %}
+                <table class="table table-bordered">
+                    <thead class="thead-light">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
+                        <th scope="col">Email</th>
+                    </tr>
+                    </thead>
+                    {% for user in users %}
+                        <tr>
+                            <th>{{ user.id }}</th>
+                            <td>{{ user.first_name }}</td>
+                            <td>{{ user.last_name }}</td>
+                            <td>{{ user.email }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <hr>
+                <nav>
+                    {{ users.render|raw }}
+                </nav>
+            {% else %}
+                <div class="alert alert-warning">There are no posts!</div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $( function() {
+        $('.pagination').addClass('justify-content-center').
+        children().addClass('page-item').
+        children().addClass('page-link');
+    });
+</script>
+{% endblock %}

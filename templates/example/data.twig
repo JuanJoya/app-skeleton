@@ -1,0 +1,15 @@
+{% extends "example/layout.twig" %}
+
+{% block title %}Data{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-2">
+            <div class="alert alert-primary" role="alert">
+                Hello <span class="font-weight-bold">{{ name }}</span>.
+            </div>
+            <div class="alert alert-info" role="alert">
+                How are you?
+            </div>
+        </div>
+    </div>
+{% endblock %}
