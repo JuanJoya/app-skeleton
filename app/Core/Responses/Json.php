@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Core\Responses;
 
@@ -17,8 +19,8 @@ class Json
     }
 
     /**
-     * @param array $data datos a serializar
-     * @param int $status código de status http
+     * @param array $data datos a serializar.
+     * @param int $status código de status http.
      * @return Response
      */
     public function make(array $data, int $status = 200)

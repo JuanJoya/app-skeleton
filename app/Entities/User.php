@@ -1,10 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entities;
 
 /**
- * Class User
- * @package App\Entities
  * @method static string safe() Retorna todos los Users en JSON serializádo.
  */
 class User extends Entity

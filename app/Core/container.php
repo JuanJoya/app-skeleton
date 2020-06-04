@@ -1,6 +1,13 @@
-<?php declare(strict_types = 1);
+<?php
+
 /**
- * @file
+ * @deprecated
+ */
+
+declare(strict_types=1);
+
+/**
+ * @internal
  * @see https://github.com/rdlowrey/auryn
  * ---------------------------------------------------------------------------------------
  * Este script crea el IoC Container|Injector para la inyección de dependencias, el
@@ -14,6 +21,8 @@
  */
 
 use Auryn\Injector;
+use App\Core\Template\{TemplateEngine, Twig\Twig};
+use Twig\Loader\{FilesystemLoader, LoaderInterface};
 
 $injector = new Injector();
 
@@ -27,7 +36,7 @@ $injector = new Injector();
  */
 $injector->alias('Http\Request', 'Http\HttpRequest');
 $injector->alias('Http\Response', 'Http\HttpResponse');
-$injector->alias('App\Core\Template\Renderer', 'App\Core\Template\TwigRenderer');
+$injector->alias(TemplateEngine::class, Twig::class);
 
 /*
  * ---------------------------------------------------------------------------------------
@@ -65,6 +74,8 @@ $injector->define('Http\HttpRequest', [
  * (con __invoke()) o a un simple Callback, esto es importante si el objeto necesita una
  * preparación especifica.
  */
-$injector->delegate('Twig_Environment', App\Core\Template\TwigFactory::class);
+$injector->delegate(LoaderInterface::class, function () {
+    return new FilesystemLoader(ROOT_PATH . '/resources/views');
+});
 
 return $injector;

@@ -1,4 +1,4 @@
-<?php declare(strict_types = 1);
+<?php
 
 /**
  * Este proyecto es una simple prueba de conceptos, implementa las siguientes
@@ -11,6 +11,8 @@
  * @license MIT
  */
 
+declare(strict_types=1);
+
 /**
  * ---------------------------------------------------------------------------------------
  * Front-end Controller
@@ -21,4 +23,4 @@
  * exponer toda la lógica de la aplicación, por esta razón colocamos el código del
  * front-end controller en un archivo externo.
  */
-require __DIR__ . '/../app/bootstrap.php';
+require dirname(__DIR__) . '/app/bootstrap.php';

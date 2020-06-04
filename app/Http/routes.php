@@ -1,6 +1,7 @@
 <?php
+
 /**
- * @file
+ * @deprecated
  * Este archivo crea una instancia del RouteCollector en el cual se registran
  * las rutas de la aplicación.
  */

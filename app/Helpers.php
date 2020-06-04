@@ -1,13 +1,16 @@
-<?php declare(strict_types = 1);
+<?php
+
 /**
- * @file
- * Este archivo registra de forma global cualquier function que se quiera
+ * @internal
+ * Este archivo registra de forma global cualquier función que se quiera
  * utilizar a modo de helper en cualquier parte de la aplicación.
  */
 
+declare(strict_types=1);
+
 if (!function_exists('cleanUrl')) {
     /**
-     * limpia la URL de caracteres extraños.
+     * Limpia la URL de caracteres extraños.
      * @param string $url
      * @return string
      */
@@ -17,14 +20,14 @@ if (!function_exists('cleanUrl')) {
     }
 }
 
-if (!function_exists('resolveExtension')) {
+if (!function_exists('addExtension')) {
     /**
-     * Agrega la extension adecuada al archivo.
+     * Agrega la extensión adecuada al archivo.
      * @param string $fileName
      * @param string $extension
      * @return string
      */
-    function resolveExtension(string $fileName, string $extension): string
+    function addExtension(string $fileName, string $extension): string
     {
         if (preg_match("/.{$extension}$/", $fileName)) {
             return $fileName;
@@ -33,16 +36,28 @@ if (!function_exists('resolveExtension')) {
     }
 }
 
+if (!function_exists('normalizeName')) {
+    /**
+     * Normaliza la notación de punto a slash en el nombre de un template.
+     * @param string $template
+     * @param string $extension
+     * @return string
+     */
+    function normalizeName(string $template, string $extension = null): string
+    {
+        return $extension ? str_replace('.', '/', $template) . ".{$extension}" : str_replace('.', '/', $template);
+    }
+}
+
 if (!function_exists('getUrl')) {
     /**
-     * Devuelve la ruta completa de un recurso.
+     * Retorna la ruta completa de un recurso.
      * @param string $url
      * @return string
      */
     function getUrl(string $url): string
     {
-        $url = preg_replace('#^/#', '', $url);
-        return URL . $url;
+        return URL . preg_replace('#^/#', '', $url);
     }
 }
 
@@ -104,7 +119,7 @@ if (!function_exists('render')) {
      */
     function render(string $template, array $params = []): string
     {
-        $path =  dirname(__DIR__) . "/templates/{$template}.php";
+        $path = ROOT_PATH . "/resources/views/{$template}.php";
         if (file_exists($path)) {
             extract($params);
             ob_start();

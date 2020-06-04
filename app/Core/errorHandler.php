@@ -1,9 +1,13 @@
-<?php declare(strict_types = 1);
+<?php
+
 /**
- * @file
+ * @deprecated
+ * @internal
  * @see https://github.com/filp/whoops
  * Este script setea el ErrorHandler de la aplicación.
  */
+
+declare(strict_types=1);
 
 use Whoops\Handler\PrettyPageHandler;
 use Whoops\Run;

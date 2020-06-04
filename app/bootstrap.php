@@ -1,8 +1,11 @@
-<?php declare(strict_types = 1);
+<?php
+
 /**
- * @file
+ * @internal
  * Este archivo contiene toda la lógica del front-end controller.
  */
+
+declare(strict_types=1);
 
 /*
  * El namespace de la aplicación, coincide con la definición del archivo composer.json
@@ -15,11 +18,24 @@ use Phroute\Phroute\Dispatcher;
 use Phroute\Phroute\Exception\HttpMethodNotAllowedException;
 use Phroute\Phroute\Exception\HttpRouteNotFoundException;
 
-/*
- * La constante URL es una cadena que apunta a la carpeta 'public' en el servidor web,
- * importante para escribir las rutas a los recursos de nuestra app.
+/**
+ * @var string ROOT_PATH directorio raíz de la aplicación.
+ */
+define('ROOT_PATH', dirname(__DIR__));
+
+/**
+ * @var string URL absoluta al directorio 'public'.
  */
 define('URL', str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']));
+
+/**
+ * @var string URI
+ */
+define('URI', str_replace(URL, '', strtok($_SERVER['REQUEST_URI'], '?')));
+
+/**
+ * Permite establecer la zona horaria de la aplicación.
+ */
 date_default_timezone_set('America/Bogota');
 
 /*
@@ -30,7 +46,7 @@ date_default_timezone_set('America/Bogota');
  * proceso por nosotros, solo es necesario setear el namespace en el archivo composer.json
  * y requerir el autoload.
  */
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+require_once ROOT_PATH . '/vendor/autoload.php';
 
 /*
  * ---------------------------------------------------------------------------------------
@@ -40,8 +56,9 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
  * lo ideal es utilizar variables de entorno, solo hace falta indicar la ruta
  * al archivo .env el cual almacena dichas variables.
  */
-$dotEnv = new Dotenv(dirname(__DIR__));
+$dotEnv = Dotenv::createImmutable(ROOT_PATH);
 $dotEnv->load();
+$dotEnv->required(['APP_DEBUG'])->isBoolean();
 
 /*
  * ---------------------------------------------------------------------------------------
@@ -143,7 +160,7 @@ $response = $injector->make('Http\HttpResponse');
  * El parámetro GET url proviene de la regla que definimos en el ModRewrite de apache
  * (.htaccess), es necesaria para el dispatch de la ruta respectiva.
  */
-$uri = cleanUrl($_GET['url'] ?? '/');
+$uri = cleanUrl($_GET['uri'] ?? URI);
 
 /*
  * ---------------------------------------------------------------------------------------

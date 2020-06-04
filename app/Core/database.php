@@ -1,6 +1,7 @@
-<?php declare(strict_types = 1);
+<?php
+
 /**
- * @file
+ * @internal
  * @see https://github.com/illuminate/database/tree/v5.5.41
  * ---------------------------------------------------------------------------------------
  * Este script crea el objeto Capsule, este nos permite configurar fácilmente la conexión
@@ -9,9 +10,11 @@
  * ---------------------------------------------------------------------------------------
  */
 
+declare(strict_types=1);
+
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-$capsule = new Capsule;
+$capsule = new Capsule();
 
 $capsule->addConnection([
     'driver'    => 'mysql',

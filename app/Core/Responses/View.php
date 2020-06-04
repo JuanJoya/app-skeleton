@@ -1,10 +1,16 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Core\Responses;
 
-use App\Core\Template\Renderer;
+use App\Core\Template\TemplateEngine;
 use Http\Response;
 
+/**
+ * Esta clase construye un Response a partir de un template compilado con el Engine,
+ * Hay protección contra ataques XSS Cross-site scripting.
+ */
 class View
 {
     /**
@@ -13,29 +19,28 @@ class View
     private $response;
 
     /**
-     * @var Renderer
+     * @var TemplateEngine
      */
-    private $renderer;
+    private $engine;
 
-    public function __construct(Response $response, Renderer $renderer)
+    public function __construct(Response $response, TemplateEngine $engine)
     {
         $this->response = $response;
-        $this->renderer = $renderer;
+        $this->engine = $engine;
     }
 
     /**
-     * @param string $template nombre del template
-     * @param array $data variables que necesita el template
-     * @param int $status código de status http
+     * @param string $template nombre del template.
+     * @param array $params parámetros a enviar al template.
+     * @param int $status código de status http.
      * @return Response
      */
-    public function make(string $template, array $data = [], int $status = 200)
+    public function make(string $template, array $params = [], int $status = 200): Response
     {
         $this->response->setStatusCode($status);
         $this->response->setContent(
-            $this->renderer->render($template, $data)
+            $this->engine->render($template, $params)
         );
-
         return $this->response;
     }
 }
