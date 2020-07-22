@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Core\Template\Twig;
+namespace App\Src\Template\Twig;
 
 use Twig\TwigFunction as Func;
 use Twig\Extension\AbstractExtension;

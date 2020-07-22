@@ -2,144 +2,142 @@
 
 namespace App\Http\Controllers;
 
-use App\Entities\User;
 use Faker\Factory;
-use Illuminate\Pagination\Paginator;
+use App\Entities\User;
+use App\Src\Response\View;
 use Sirius\Validation\Validator;
+use PSR7Sessions\Storageless\Http\SessionMiddleware;
+use Laminas\Diactoros\Response\{JsonResponse,RedirectResponse};
+use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 
 class HomeController extends Controller
 {
-    /**
-     * @var Validator objeto para validar Request.
-     */
-    private $validator;
+    private View $view;
+    private Validator $validator;
 
     /**
-     * HomeController constructor.
-     * @param Validator $validator
      * El contenedor IoC se encarga de resolver las dependencias.
+     * @param View $view
+     * @param Validator $validator
      */
-    public function __construct(Validator $validator)
+    public function __construct(View $view, Validator $validator)
     {
+        $this->view = $view;
         $this->validator = $validator;
     }
 
     /*
-     * El objeto View es una Response genérica que internamente
-     * utiliza el template engine para renderizar las vistas.
+     * El objeto View encapsula el template engine con un objeto Response.
      */
-    public function getIndex()
+    public function index(): ResponseInterface
     {
-        $this->view->make('example/home');
+        return $this->view->make('example/home');
     }
 
     /*
-     * El método redirect se encarga de setear los headers necesarios
-     * y el http status para hacer la redirección de un recurso.
+     * El objeto RedirectResponse se encarga de setear el status http y los headers necesarios para
+     * redireccionar un recurso.
      */
-    public function getRedirect()
+    public function redirect(): ResponseInterface
     {
-        $this->response->redirect(getUrl('/data?name=John+Doe'));
+        return new RedirectResponse(getUrl('/app/data?name=John+Doe'));
     }
 
     /*
-     * El método getParameter del Request permite acceder a los valores
-     * que se envíen por GET o POST.
+     * El método getQueryParams del Request permite acceder a los valores del QueryString.
      */
-    public function getData()
+    public function data(ServerRequestInterface $request): ResponseInterface
     {
-        $this->view->make('example/data', [
-            'name' => $this->request->getParameter('name', 'Guest')
+        return $this->view->make('example/data', [
+            'name' => $request->getQueryParams()['name']
         ]);
     }
 
     /*
-     * El objeto Json es una Response genérica que internamente
-     * setea los headers necesarios y serialíza el array en formato
-     * JSON.
+     * El objeto JsonResponse setea los headers necesarios y serialíza el array para obtener
+     * un Response tipo JSON.
      */
-    public function getJson()
+    public function json(): ResponseInterface
     {
-        $this->json->make($this->fakePerson());
+        return new JsonResponse($this->fakePerson());
+    }
+
+    /**
+     * Todos los Handlers de un Controller reciben una instancia de ServerRequest y deben retornar
+     * un Response, en el Request se puede obtener un objeto de Session que fue inyectado previamente
+     * mediante un Middleware.
+     */
+    public function session(ServerRequestInterface $request): ResponseInterface
+    {
+        /**
+         * @var \PSR7Sessions\Storageless\Session\SessionInterface $session
+         */
+        $session = $request->getAttribute(SessionMiddleware::SESSION_ATTRIBUTE);
+        $session->set('counter', $session->get('counter', 0) + 1);
+        return $this->view->make('example/session', [
+            'counter' => $session->get('counter')
+        ]);
     }
 
     /*
-     * El método paginate permite paginar sobre un array genérico
-     * o una Collection de Laravel.
+     * El método paginate permite paginar sobre un array genérico o un objeto Collection.
      */
-    public function getArrayPaginate()
+    public function arrayPaginate(): ResponseInterface
     {
         $users = $this->paginate($this->fakePerson(50));
-        $this->view->make('example/paginate', compact('users'));
+        return $this->view->make('example/paginate', compact('users'));
     }
 
     /*
-     * El método paginate de Eloquent resuelve el tema de la paginación
-     * internamente aunque es necesarios setear ciertos parámetros.
+     * El método paginate de Eloquent resuelve el tema de la paginación internamente.
      */
-    public function getOrmPaginate()
+    public function ormPaginate(): ResponseInterface
     {
-        Paginator::currentPathResolver(function () {
-            return isset($_SERVER['REQUEST_URI']) ? strtok($_SERVER['REQUEST_URI'], '?') : '/';
-        });
-
-        Paginator::currentPageResolver(function ($pageName = 'page') {
-            $page = isset($_REQUEST[$pageName]) ? $_REQUEST[$pageName] : 1;
-            return $page;
-        });
-
         $users = User::orderBy('id', 'desc')->paginate(5);
-
-        $this->view->make('example/paginate', compact('users'));
+        return $this->view->make('example/paginate', compact('users'));
     }
 
-    public function getCreate()
+    public function create(): ResponseInterface
     {
-        $this->view->make('example/create');
+        return $this->view->make('example/create');
     }
 
-    public function postCreate()
+    /**
+     * El objeto Validator permite validar los datos que se obtienen en el Request(form).
+     */
+    public function store(ServerRequestInterface $request): ResponseInterface
     {
         $errors = [];
         $result = false;
-        $data = $this->request->getBodyParameters();
-
+        $data = $request->getParsedBody();
         $this->validator->add([
             'first_name:First Name' => 'required | alpha | minlength(3) | maxlength(50)',
             'last_name:Last Name' => 'required | alpha | minlength(3) | maxlength(50)',
-            'email:Email' => 'required | email',
+            'email:Email' => 'required | email | unique(users,email)',
             'password:Password' => 'required | minlength(8) | maxlength(24)'
         ]);
-
         if ($this->validator->validate($data)) {
             $user = new User([
-                'first_name' => $this->request->getParameter('first_name'),
-                'last_name'  => $this->request->getParameter('last_name'),
-                'email'      => $this->request->getParameter('email'),
-                'password'   => password_hash(
-                    $this->request->getParameter('password'),
-                    PASSWORD_DEFAULT
-                )
+                'first_name' => $data['first_name'],
+                'last_name'  => $data['last_name'],
+                'email'      => $data['email'],
+                'password'   => password_hash($data['password'], PASSWORD_DEFAULT)
             ]);
             $result = $user->save();
         } else {
             $errors = $this->validator->getMessages();
         }
-
-        $this->view->make('example/create', compact('result', 'errors', 'data'));
+        return $this->view->make('example/create', compact('result', 'errors', 'data'));
     }
 
     /**
-     * Se utiliza Faker para generar datos falsos que pueden ser
-     * de utilidad para testear los features de la app.
+     * Se utiliza Faker para generar datos falsos que pueden ser de utilidad para testear los features de la app.
      * @param int $total
      * @return array
      */
-    private function fakePerson(int $total = 10)
+    private function fakePerson(int $total = 10, array $result = []): array
     {
-        $result = [];
-        $faker  = Factory::create();
-
+        $faker = Factory::create();
         for ($i = 1; $i <= $total; $i++) {
             $result[] = [
                 'id' => $i,

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Core\Template\Twig;
+namespace App\Src\Template\Twig;
 
 use Twig\Environment;
-use App\Core\Template\TemplateEngine;
+use App\Src\Template\TemplateEngine;
 
 /**
  * Esta clase es un Adapter de la clase \Twig\Environment solo tiene
@@ -13,10 +13,7 @@ use App\Core\Template\TemplateEngine;
  */
 class Twig implements TemplateEngine
 {
-    /**
-     * @var Environment
-     */
-    private $engine;
+    private Environment $engine;
 
     /**
      * @param Environment $engine

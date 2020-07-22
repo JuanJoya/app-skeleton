@@ -10,19 +10,20 @@ namespace App\Entities;
 class User extends Entity
 {
     /**
-     * @var string nombre de la tabla que representa esta entidad.
+     * Nombre de la tabla que representa esta entidad.
+     * @var string
      */
     protected $table = 'users';
 
     /**
-     * @var array parámetros http permitidos.
+     * Parámetros permitidos al usar asignación masiva (Mass Assignment).
+     * @var array
      */
     protected $fillable = ['first_name', 'last_name', 'email', 'password'];
 
     /**
      * QueryScope retorna objeto Json con información no sensible
      * de todos los usuarios.
-     *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return string
      */

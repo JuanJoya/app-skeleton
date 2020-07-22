@@ -1,34 +1,28 @@
 <?php
 
 /**
- * @deprecated
- * Este archivo crea una instancia del RouteCollector en el cual se registran
- * las rutas de la aplicación.
+ * ---------------------------------------------------------------------------------------
+ * En este archivo se registran las rutas de la Aplicación, cada ruta puede responder a
+ * diferentes verbos HTTP, se admiten PSR-15 Middleware ya que el router también funciona
+ * como dispatcher, cada ruta necesita un string con la url y un handler, este puede ser
+ * un callback o un array con el namespace y el método para llamar a un Controller.
+ * ---------------------------------------------------------------------------------------
+ * @see https://route.thephpleague.com/4.x/routes/
+ * @var League\Route\Router $router
  */
 
-use Phroute\Phroute\RouteCollector;
+use League\Route\RouteGroup;
+use App\Http\Controllers\HomeController;
 
-$router = new RouteCollector();
+$router->get('/', [HomeController::class, 'index']);
 
-/**
- * ---------------------------------------------------------------------------------------
- * App Routes
- * ---------------------------------------------------------------------------------------
- * Cada ruta puede responder a diferentes verbos http (get|post|put|patch|delete):
- *     $router->any($route, $handler);
- *
- * Donde $route es un string con la url que deseamos atender y $handler puede ser un
- * callback o un array con el namespace y el método para llamar a una clase.
- *      $router->any('/users/{id}', ['Controllers\User','show']);
- *
- * Mas información en:
- * @see https://github.com/mrjgreen/phroute
- */
-
-$router->get('/example', function () {
-    response()->setContent('Hello World!');
+$router->group('app', function (RouteGroup $route) {
+    $route->get('/redirect', [HomeController::class, 'redirect']);
+    $route->get('/data', [HomeController::class, 'data']);
+    $route->get('/json', [HomeController::class, 'json']);
+    $route->get('/session', [HomeController::class, 'session']);
+    $route->get('/array-paginate', [HomeController::class, 'arrayPaginate']);
+    $route->get('/orm-paginate', [HomeController::class, 'ormPaginate']);
+    $route->get('/create', [HomeController::class, 'create']);
+    $route->post('/create', [HomeController::class, 'store']);
 });
-
-$router->controller('/', App\Http\Controllers\HomeController::class);
-
-return $router;

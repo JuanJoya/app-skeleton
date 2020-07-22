@@ -1,0 +1,17 @@
+{% extends "example/layout.twig" %}
+
+{% block title %}Session{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-8">
+            <p>Visitor Counter (reload page to see changes):</p>
+            <div class="row">
+                <div class="col-2">
+                    <div class="alert alert-primary text-center" role="alert">
+                        {{ counter }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

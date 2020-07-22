@@ -1,6 +1,5 @@
 .btn-custom {
     background: linear-gradient(270deg,#0684d3 0,#0684d3 50%,#0790e4);
-    color: white;
     font-weight: bold;
 }
 .btn-custom:hover {
